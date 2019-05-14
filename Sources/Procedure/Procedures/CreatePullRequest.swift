@@ -1,0 +1,256 @@
+import Environment
+import Foundation
+import Model
+import Request
+import UI
+import Utils
+
+public final class CreatePullRequest: Procedure {
+    enum Error: Swift.Error {
+        case
+            noReviewersReceived,
+            noBranchSelected,
+            interactiveCommandFailed,
+            noTitleProvided,
+            noIssueKey,
+            transitionNotFound(String),
+            selfDeallocated
+    }
+
+    private let defaultReviewers: Bool
+    private let parentBranch: Bool
+    private let noEdit: Bool
+
+    private var currentIssueKey = Env.current.jira.currentIssueKey(promptOnError: false)
+    private var currentIssue: Issue?
+
+    public init(defaultReviewers: Bool, parentBranch: Bool, noEdit: Bool) {
+        self.defaultReviewers = defaultReviewers
+        self.parentBranch = parentBranch
+        self.noEdit = noEdit
+    }
+
+    public func run() -> Bool {
+        guard let stashProject = Env.current.git.projectOrUser,
+            let repo = Env.current.git.currentRepo,
+            let currentBranch = Env.current.git.currentBranch else { return false }
+
+        // prefetch current issue
+        currentIssueKey.map(GetIssue.init)?.request().onResult {
+            switch $0 {
+            case let .success(issue):
+                self.currentIssue = issue
+            case let .failure(failure) where Env.current.debug:
+                Env.current.shell.write("\(failure)")
+            default:
+                break
+            }
+        }
+
+        let result = destinationBranch(parentBranch: parentBranch)
+            .concat(reviewers(stashProject: stashProject, repo: repo, defaultReviewers: defaultReviewers))
+            .map { branchResult, reviewersResult -> Result<(destinationBranch: String, reviewers: [String]), Swift.Error> in
+                switch (branchResult, reviewersResult) {
+                case let (.failure(failure), _), let (_, .failure(failure)):
+                    return .failure(failure)
+                case let (.success(destinationBranch), .success(reviewers)):
+                    return .success((destinationBranch, reviewers))
+                }
+            }
+            .await()
+            .flatMap { [weak self] destinationBranch, reviewers -> Result<PostPullRequest.Response, Swift.Error> in
+                guard let self = self else { return .failure(Error.selfDeallocated) }
+                let title, description: String
+                let defaultTitle = self.createDefaultTitle(from: currentBranch)
+                if self.noEdit {
+                    title = defaultTitle
+                    description = ""
+                } else {
+                    switch self.promptToCreateTitleAndDescription(defaultTitle: defaultTitle) {
+                    case let .success(success):
+                        title = success.title
+                        description = success.description
+                    case let .failure(failure):
+                        return .failure(failure)
+                    }
+                }
+                return PostPullRequest(stashProject: stashProject,
+                                       repository: repo,
+                                       title: title,
+                                       source: currentBranch,
+                                       destination: destinationBranch,
+                                       reviewers: reviewers,
+                                       description: description,
+                                       closeSourceBranch: true).request().await()
+            }
+            .flatMap { _ -> Result<(issueKey: String, response: GetIssueTransitions.Response), Swift.Error> in
+                // No key in branch name nor key provided -> don't try to set new status
+                guard let issueKey = currentIssueKey else {
+                    return .failure(Error.noIssueKey)
+                }
+
+                return GetIssueTransitions(issueKey: issueKey).request().await().map { (issueKey, $0) }
+            }
+            .flatMap { issueKey, response -> Result<PostTransition.Response, Swift.Error> in
+                if let transition = response.transitions.first(where: { $0.name == "Ready To Review" }) {
+                    return PostTransition(issueKey: issueKey, transitionId: transition.id).request().await()
+                }
+                return .failure(Error.transitionNotFound("Ready to Review"))
+            }
+
+        switch result {
+        case .success:
+            return true
+        case let .failure(failure):
+            if Env.current.debug {
+                Env.current.shell.write("\(failure)")
+            }
+            switch failure {
+            case Error.noBranchSelected, Error.noIssueKey, Error.noTitleProvided:
+                // User opt-out
+                return true
+            default:
+                return false
+            }
+        }
+    }
+
+    private func reviewers(stashProject: String, repo: String, defaultReviewers: Bool) -> Future<Result<[String], Swift.Error>> {
+        var reviewers = Future.return(Result<[String], Swift.Error>.failure(Error.noReviewersReceived))
+        if defaultReviewers {
+            reviewers = GetDefaultReviewers(stashProject: stashProject, repo: repo)
+                .request()
+                .map { result -> Result<[String], Swift.Error> in
+                    result.flatMap {
+                        let username = Env.current.login.username
+                        let names = $0.first?.reviewers.filter { $0.active && $0.name != username }.map { $0.name }
+                        if let reviewers = names {
+                            return .success(reviewers)
+                        } else {
+                            Env.current.shell.write("Could not retrieve default reviewers. Trying to get potential reviewers from previous commits…")
+                            return .failure(Error.noReviewersReceived)
+                        }
+                    }
+                }
+        }
+
+        return reviewers.flatMap { result -> Future<Result<[String], Swift.Error>> in
+            switch result {
+            case .success:
+                return Future.return(result)
+            case .failure:
+                return
+                    GetLastCommits(stashProject: stashProject, repo: repo, limit: 500)
+                    .request()
+                    .map { result in
+                        result.flatMap { response -> Result<[String], Swift.Error> in
+                            let committers = response.values.map { $0.committer }.filter { $0.active }
+                            if !committers.isEmpty,
+                                let lineSelector = LineSelector(dataSource: GenericLineSelectorDataSource(items: Array(Set(committers)), line: \.description)),
+                                let selection = lineSelector.multiSelection() {
+                                return .success(selection.output.map { $0.name })
+                            } else {
+                                return .failure(Error.noReviewersReceived)
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    private func destinationBranch(parentBranch: Bool) -> Future<Result<String, Swift.Error>> {
+        let allBranches = Env.current.git.branches(.all)
+        var destinationBranch = Future.return(Result<String, Swift.Error>.failure(Error.noBranchSelected))
+
+        if parentBranch,
+            let parent = (currentIssue?.fields.parent?.key).flatMap({ key in allBranches.first { $0.contains(key) } }) {
+            destinationBranch = Future.return(.success(parent))
+        } else if parentBranch,
+            let jiraIssueKey = currentIssueKey {
+            destinationBranch = GetIssue(issueKey: jiraIssueKey)
+                .request()
+                .map { result in
+                    result.flatMap { response -> Result<String, Swift.Error> in
+                        if let parentKey = response.fields.parent?.key,
+                            let parentBranch = allBranches.first(where: { $0.contains(parentKey) }) {
+                            return .success(parentBranch)
+                        } else {
+                            Env.current.shell.write("Could not find parent branch. Please choose one from the following:")
+                            return .failure(Error.noBranchSelected)
+                        }
+                    }
+                }
+        }
+
+        return destinationBranch.map { result in
+            result.flatMapError { error -> Result<String, Swift.Error> in
+                let dataSource = GenericLineSelectorDataSource(items: allBranches)
+                if let branch = LineSelector(dataSource: dataSource)?.singleSelection()?.output {
+                    return .success(branch)
+                } else {
+                    return .failure(error)
+                }
+            }
+        }
+    }
+
+    private func promptToCreateTitleAndDescription(defaultTitle: String) -> Result<(title: String, description: String), Swift.Error> {
+        let tempFile: File
+        do {
+            tempFile = try Env.current.file.init(write: { template(branch: defaultTitle) })
+        } catch {
+            return .failure(error)
+        }
+        defer { try? tempFile.remove() }
+
+        guard Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(tempFile.path)") else {
+            return .failure(Error.interactiveCommandFailed)
+        }
+
+        let arrays = tempFile.parse(markSwitchToSecondBlockLinePrefix: "Description", markEndLinePrefix: nil)
+        let title = arrays.0.filter { !$0.isEmpty }.joined(separator: " ")
+        let description = arrays.1.joined(separator: "\n")
+
+        if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return .failure(Error.noTitleProvided)
+        } else {
+            return .success((title, description))
+        }
+    }
+
+    private func createDefaultTitle(from branch: String) -> String {
+        let regex = NSRegularExpression("^([[:alpha:]]*?)[[:punct:]]([[:upper:]]*?[[:punct:]][[:digit:]]*?)[[:punct:]]([[:ascii:]]+)$")
+
+        let matches = regex.matches(in: branch, options: [], range: NSRange(location: 0, length: branch.utf16.count))
+
+        guard let match = matches.first else { return branch }
+
+        let components = Array(1 ..< match.numberOfRanges)
+            .compactMap { index -> String? in
+                let range = Range(match.range(at: index), in: branch)
+                return range.map { String(branch[$0]) }
+            }
+
+        return components.enumerated().reduce(into: "") { title, current in
+            let (index, component) = current
+            switch index {
+            case 0:
+                title = component.capitalized
+            case 2:
+                title += " \(currentIssue?.fields.summary ?? component.replacingOccurrences(of: "-", with: " "))"
+            default:
+                title += " \(component)"
+            }
+        }
+    }
+
+    private func template(branch: String) -> String {
+        return """
+        # Title
+        \(branch)
+
+        # Description (optional)
+
+        """
+    }
+}
