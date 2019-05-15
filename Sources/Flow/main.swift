@@ -162,7 +162,7 @@ Tool(name: toolName, arguments: arguments) { flow in
         let issueKey = cmd.argument(String.self,
                                     shortName: "i",
                                     longName: "issue",
-                                    description: "Specify the issue key for which to create a branch. Format: <PROJECT-1234>")
+                                    description: "Specify the issue key for which to create a branch.")
 
         cmd.handler {
             run(Initialize(jiraProject: project.value,
@@ -368,9 +368,10 @@ Tool(name: toolName, arguments: arguments) { flow in
 
         let issueKey = cmd.argument(String.self, shortName: "i", longName: "issue", description: "The key of the issue the user should be assigned to.")
         let assignToSelf = cmd.option(shortName: "s", longName: "self", description: "Assign the issue to yourself.")
+        let unassign = cmd.option(shortName: "u", longName: "unassign", description: "Remove assignee.")
 
         cmd.handler {
-            run(AssignIssue(issueKey: issueKey.value, assignToSelf: assignToSelf.wasSet))
+            run(AssignIssue(issueKey: issueKey.value, assignToSelf: assignToSelf.wasSet, unassign: unassign.wasSet))
         }
     }
 
@@ -378,6 +379,7 @@ Tool(name: toolName, arguments: arguments) { flow in
 
         let showAll = cmd.option(shortName: "a", longName: "all", description: "Show all reminders instead of those from current repository (default).")
         let showOnlyBranch = cmd.option(shortName: "b", longName: "branch", description: "Show only reminders created with the current branch checked out.")
+        let reminderToAdd = cmd.arguments(String.self, shortName: "r", longName: "reminder", description: "Directly add a new reminder.")
 
         cmd.handler {
             let scope: Reminders.Scope
@@ -388,7 +390,9 @@ Tool(name: toolName, arguments: arguments) { flow in
             } else {
                 scope = .repo
             }
-            run(Reminders(scope: scope))
+            let reminderToAdd = reminderToAdd.value.joined(separator: " ")
+            let reminder = reminderToAdd.isEmpty ? nil : reminderToAdd
+            run(Reminders(scope: scope, reminderToAdd: reminder))
         }
     }
 }

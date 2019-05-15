@@ -49,7 +49,7 @@ struct ShellImpl: Shell {
 
     func run(_ command: String) -> Bool {
         let (output, success) = self.command(command)
-        if let output = output {
+        if let output = output?.trimmingCharacters(in: .whitespacesAndNewlines), !output.isEmpty {
             write(output)
         }
         return success
@@ -58,7 +58,8 @@ struct ShellImpl: Shell {
     func run(_ command: String) -> String? {
         let (output, success) = self.command(command)
         if success {
-            return output?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = output?.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed?.isEmpty == true ? nil : trimmed
         } else {
             output.map { write($0) }
             return nil

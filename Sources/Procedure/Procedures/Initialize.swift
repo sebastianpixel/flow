@@ -24,8 +24,8 @@ public struct Initialize: Procedure {
 
     public func run() -> Bool {
         let issueResult: Result<Issue, Swift.Error>
-        if let issueFromProvidedKey = issueKey.map(getIssue) {
-            issueResult = issueFromProvidedKey
+        if let issueFromProvidedKey = issueKey.map(getIssueKey) {
+            issueResult = issueFromProvidedKey.map { GetIssue(issueKey: $0).request().await() } ?? .failure(Error.noIssueKey)
         } else if let project = getJiraProject(from: jiraProject) {
             issueResult = selectFromAllIssues(JIRAproject: project)
         } else {
@@ -81,14 +81,6 @@ public struct Initialize: Procedure {
             }
             return false
         }
-    }
-
-    private func getIssue(issueKey: String) -> Result<Issue, Swift.Error> {
-        guard issueKey.range(of: String.jiraIssueKeyPattern, options: [.regularExpression, .anchored]) != nil else {
-            Env.current.shell.write("Issue key needs to have the format <PROJECT-1234>")
-            return .failure(Error.noIssueKey)
-        }
-        return GetIssue(issueKey: issueKey).request().await()
     }
 
     private func selectFromAllIssues(JIRAproject: String) -> Result<Issue, Swift.Error> {

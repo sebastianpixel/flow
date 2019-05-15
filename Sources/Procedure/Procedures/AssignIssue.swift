@@ -8,14 +8,16 @@ import Foundation
 public struct AssignIssue: Procedure {
     let issueKey: String?
     let assignToSelf: Bool
+    let unassign: Bool
 
     enum Error: Swift.Error {
         case noAssignee
     }
 
-    public init(issueKey: String?, assignToSelf: Bool) {
+    public init(issueKey: String?, assignToSelf: Bool, unassign: Bool) {
         self.issueKey = issueKey
         self.assignToSelf = assignToSelf
+        self.unassign = unassign
     }
 
     public func run() -> Bool {
@@ -24,7 +26,9 @@ public struct AssignIssue: Procedure {
             let repo = Env.current.git.currentRepo else { return false }
 
         let result: Result<PutIssueAssignee.Response, Swift.Error>
-        if assignToSelf {
+        if unassign {
+            result = PutIssueAssignee(issueKey: issueKey, username: "").request().await()
+        } else if assignToSelf {
             let username = Env.current.login.username
             result = PutIssueAssignee(issueKey: issueKey, username: username).request().await()
         } else {
@@ -32,8 +36,9 @@ public struct AssignIssue: Procedure {
                 .request()
                 .await()
                 .flatMap { response -> Result<User, Swift.Error> in
-                    let committers = response.values.map { $0.committer }
-                    guard !committers.isEmpty,
+                    let committers = Set(response.values.map { $0.committer }).sorted { $0.name > $1.name }
+                    guard
+                        !committers.isEmpty,
                         let selector = LineSelector(dataSource: GenericLineSelectorDataSource(items: committers, line: \User.description)),
                         let assignee = selector.singleSelection()?.output else { return .failure(Error.noAssignee) }
                     return .success(assignee)

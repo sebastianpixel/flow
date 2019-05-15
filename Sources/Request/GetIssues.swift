@@ -20,8 +20,9 @@ public struct GetIssues: Request {
     public let path = "/rest/api/2/search"
     public let httpBody = Data?.none
     public var queryItems: [URLQueryItem] {
+        let issueTypes = types.map { $0.jqlSearchTerm }.joined(separator: ",")
         return [
-            .init(name: "jql", value: #"project=\#(jiraProject)+AND+issuetype+in+(\#(types.map { $0.jqlSearchTerm }.joined(separator: ",")))+order+by+updatedDate"#),
+            .init(name: "jql", value: #"project=\#(jiraProject)+AND+status+in+(Open,"Next","To Do")+AND+issuetype+in+(\#(issueTypes))+order+by+updatedDate"#),
             .init(name: "fields", value: "key,summary,issuetype,parent,updated"),
             .init(name: "maxResults", value: "\(limit)")
         ]

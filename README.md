@@ -67,6 +67,8 @@ Options:
       The key of the issue the user should be assigned to.
   -s, --self
       Assign the issue to yourself.
+  -u, --unassign
+      Remove assignee.
 
 flow board, bo <options>
 Open the JIRA board of the current sprint.
@@ -167,7 +169,7 @@ Options:
   -h, --help
       Print the usage description of 'init'.
   -i, --issue <value>
-      Specify the issue key for which to create a branch. Format: <PROJECT-1234>
+      Specify the issue key for which to create a branch.
   -p, --project <value>
       The JIRA project in which to search for issues.
 
@@ -225,6 +227,8 @@ Options:
       Show only reminders created with the current branch checked out.
   -h, --help
       Print the usage description of 'reminders'.
+  -r, --reminder <value> ...
+      Directly add a new reminder.
 
 flow remove-branch, rmb <options>
 Remove local (default) or remote branches.

@@ -9,15 +9,15 @@ extension EKReminder {
     var line: String {
         if let info = info {
             var line = [String]()
-            if let repository = info.repository {
+            if let repository = info.repository,
+                repository != Env.current.git.currentRepo {
                 line.append("repo: \(repository)")
             }
-            if let branch = info.branch {
+            if let branch = info.branch,
+                branch != Env.current.git.currentBranch {
                 line.append("branch: \(branch)")
             }
-            if !line.isEmpty {
-                return "\(title ?? "") (\(line.joined(separator: ", ")))"
-            }
+            return "\(title ?? "")(\(line.isEmpty ? "" : " \(line.joined(separator: ", "))"))"
         }
         return title
     }
@@ -71,9 +71,14 @@ public struct Reminders: Procedure {
     }
 
     private let scope: Scope
+    private let lineReader: LineReader
+    private let reminderToAdd: String?
 
-    public init(scope: Scope) {
+    public init(scope: Scope, reminderToAdd: String?) {
+        guard let lineReader = LineReader() else { fatalError("Could not create LineReader") }
+        self.lineReader = lineReader
         self.scope = scope
+        self.reminderToAdd = reminderToAdd
     }
 
     public func run() -> Bool {
@@ -96,6 +101,10 @@ public struct Reminders: Procedure {
             return false
         }
 
+        if let reminderToAdd = reminderToAdd {
+            return add(titles: [reminderToAdd], store: store, calendar: calendar, lineDrawer: .init(linesToDrawCount: 0))
+        }
+
         let predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: nil, calendars: nil)
 
         guard let reminders = Future<[EKReminder]?>({ resolver in
@@ -115,6 +124,11 @@ public struct Reminders: Procedure {
             }
         }).await() else { return false }
 
+        guard !reminders.isEmpty else {
+            Env.current.shell.write("Everything done! No open reminders. \\o/")
+            return true
+        }
+
         let initialLines = [""] + reminders.map { "  \($0.line)" } + [""]
 
         let lineDrawer = LineDrawer(linesToDrawCount: initialLines.count)
@@ -124,93 +138,114 @@ public struct Reminders: Procedure {
         guard let (input, output) = LineSelector(dataSource: actions)?.singleSelection(),
             let action = Reminders.Action.allCases.first(where: { String($0.shortcut) == input }) ?? output else { return true }
 
-        lineDrawer.reset(lines: lineDrawer.linesToDrawCount)
+        let remindersDataSource = { GenericLineSelectorDataSource(items: reminders) { $0.line } }
 
-        guard let lineReader = LineReader() else { return false }
-
-        let remindersDataSource = { GenericLineSelectorDataSource(items: reminders, line: \.line) }
+        lineDrawer.reset()
 
         switch action {
         case .add:
-            guard let titles = try? lineReader
-                .readLine(prompt: "Add new reminders (comma separated): ")
-                .split(separator: ",")
-                .map({ $0.trimmingCharacters(in: .whitespaces) }),
-                !titles.isEmpty else { return false }
-
-            let info = Reminders.Info(repository: Env.current.git.currentRepo,
-                                      branch: Env.current.git.currentBranch)
-
-            for title in titles {
-                let reminder = EKReminder(eventStore: store)
-                reminder.calendar = calendar
-                reminder.title = title
-                reminder.notes = """
-                \(Reminders.Info.marker)
-                \((try? info.encoded()).flatMap { String(data: $0, encoding: .utf8) } ?? "")
-                """
-                do {
-                    try store.save(reminder, commit: false)
-                } catch {
-                    Env.current.shell.write("\(error)")
-                }
-            }
-            do {
-                try store.commit()
-            } catch {
-                Env.current.shell.write("\(error)")
-            }
-            lineDrawer.reset(lines: 1)
-            Env.current.shell.write("Added \(titles.map { "\"\($0)\"" }.joined(separator: ", ")).")
-
+            let titles = promptTitlesToAdd()
+            return add(titles: titles,
+                       store: store,
+                       calendar: calendar,
+                       lineDrawer: lineDrawer)
         case .complete, .remove:
-            Env.current.shell.write("")
-            guard let relevantReminders = LineSelector(dataSource: remindersDataSource())?.multiSelection()?.output,
-                !relevantReminders.isEmpty else { return true }
-            relevantReminders.forEach { reminder in
-                do {
-                    if action == .remove {
-                        try store.remove(reminder, commit: false)
-                    } else {
-                        reminder.isCompleted = true
-                        reminder.completionDate = .init()
-                        try store.save(reminder, commit: false)
-                    }
-                } catch {
-                    Env.current.shell.write("\(error)")
-                }
-            }
-            do {
-                try store.commit()
-            } catch {
-                Env.current.shell.write("\(error)")
-                return false
-            }
-            lineDrawer.reset(lines: 3)
-            let titles = relevantReminders.map { "\"\($0.title ?? "")\"" }.joined(separator: ", ")
-            let output = action == .complete
-                ? "Marked \(titles) as completed."
-                : "Removed \(titles)."
-            Env.current.shell.write(output)
-
+            return completeOrRemove(action: action,
+                                    store: store,
+                                    remindersDataSource: remindersDataSource,
+                                    lineDrawer: lineDrawer)
         case .edit:
-            Env.current.shell.write("")
-            guard let reminder = LineSelector(dataSource: remindersDataSource())?.singleSelection()?.output,
-                let newTitle = try? lineReader.readLine(prompt: "Edit reminder: ", line: reminder.title),
-                !newTitle.isEmpty else { return true }
-            reminder.title = newTitle
+            return edit(store: store,
+                        remindersDataSource: remindersDataSource,
+                        lineDrawer: lineDrawer)
+        case .quit:
+            return true
+        }
+    }
+
+    private func completeOrRemove(action: Action, store: EKEventStore, remindersDataSource: () -> GenericLineSelectorDataSource<EKReminder>, lineDrawer: LineDrawer) -> Bool {
+        Env.current.shell.write("")
+        guard let relevantReminders = LineSelector(dataSource: remindersDataSource())?.multiSelection()?.output,
+            !relevantReminders.isEmpty else { return true }
+        relevantReminders.forEach { reminder in
             do {
-                try store.save(reminder, commit: true)
+                if action == .remove {
+                    try store.remove(reminder, commit: false)
+                } else {
+                    reminder.isCompleted = true
+                    reminder.completionDate = .init()
+                    try store.save(reminder, commit: false)
+                }
             } catch {
                 Env.current.shell.write("\(error)")
-                return false
             }
-            lineDrawer.reset(lines: 3)
-            Env.current.shell.write("Updated \"\(newTitle)\".")
-
-        case .quit:
-            break
         }
+        do {
+            try store.commit()
+        } catch {
+            Env.current.shell.write("\(error)")
+            return false
+        }
+        lineDrawer.reset(lines: 3)
+        let titles = relevantReminders.map { "\"\($0.title ?? "")\"" }.joined(separator: ", ")
+        let output = action == .complete
+            ? "Marked \(titles) as completed."
+            : "Removed \(titles)."
+        Env.current.shell.write(output)
+        return true
+    }
+
+    private func edit(store: EKEventStore, remindersDataSource: () -> GenericLineSelectorDataSource<EKReminder>, lineDrawer: LineDrawer) -> Bool {
+        Env.current.shell.write("")
+        guard let reminder = LineSelector(dataSource: remindersDataSource())?.singleSelection()?.output,
+            let newTitle = try? lineReader.readLine(prompt: "Edit reminder: ", line: reminder.title),
+            !newTitle.isEmpty else { return true }
+        reminder.title = newTitle
+        do {
+            try store.save(reminder, commit: true)
+        } catch {
+            Env.current.shell.write("\(error)")
+            return false
+        }
+        lineDrawer.reset(lines: 3)
+        Env.current.shell.write("Updated \"\(newTitle)\".")
+        return true
+    }
+
+    private func promptTitlesToAdd() -> [String] {
+        return (try? lineReader
+            .readLine(prompt: "Add new reminders (comma separated): ")
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }) ?? []
+    }
+
+    private func add(titles: [String], store: EKEventStore, calendar: EKCalendar, lineDrawer: LineDrawer) -> Bool {
+        guard !titles.isEmpty else { return false }
+
+        let info = Reminders.Info(repository: Env.current.git.currentRepo,
+                                  branch: Env.current.git.currentBranch)
+
+        for title in titles {
+            let reminder = EKReminder(eventStore: store)
+            reminder.calendar = calendar
+            reminder.title = title
+            reminder.notes = """
+            \(Reminders.Info.marker)
+            \((try? info.encoded()).flatMap { String(data: $0, encoding: .utf8) } ?? "")
+            """
+            do {
+                try store.save(reminder, commit: false)
+            } catch {
+                Env.current.shell.write("\(error)")
+            }
+        }
+        do {
+            try store.commit()
+        } catch {
+            Env.current.shell.write("\(error)")
+        }
+        lineDrawer.reset(lines: 1)
+        Env.current.shell.write("Added \(titles.map { "\"\($0)\"" }.joined(separator: ", ")).")
 
         return true
     }

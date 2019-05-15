@@ -1,10 +1,17 @@
 import Environment
+import Foundation
 
 public struct XCOpen: Procedure {
     public init() {}
 
     public func run() -> Bool {
-        guard let files = Env.current.shell.run("ls `pwd`")?.components(separatedBy: .newlines) else { return false }
+        let files: [String]
+        do {
+            files = try FileManager.default.contentsOfDirectory(atPath: FileManager.default.currentDirectoryPath)
+        } catch {
+            Env.current.shell.write("\(error)")
+            return false
+        }
 
         let relevantFileEndings = ["xcworkspace", "xcodeproj", "playground"]
 
