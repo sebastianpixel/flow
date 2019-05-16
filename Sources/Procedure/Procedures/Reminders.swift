@@ -4,6 +4,7 @@ import EventKit
 import Foundation
 import UI
 import Utils
+import Yams
 
 extension EKReminder {
     var line: String {
@@ -17,26 +18,13 @@ extension EKReminder {
                 branch != Env.current.git.currentBranch {
                 line.append("branch: \(branch)")
             }
-            return "\(title ?? "")(\(line.isEmpty ? "" : " \(line.joined(separator: ", "))"))"
+            return "\(title ?? "")\(line.isEmpty ? "" : " (\(line.joined(separator: ", ")))")"
         }
         return title
     }
 
     var info: Reminders.Info? {
-        return notes.flatMap(parse)
-    }
-
-    private func parse(_ text: String) -> Reminders.Info? {
-        var tryDecoding = false
-        for line in text.components(separatedBy: .newlines) {
-            if tryDecoding {
-                return try? line.data(using: .utf8)?.decoded(Reminders.Info.self)
-            }
-            if line == Reminders.Info.marker {
-                tryDecoding = true
-            }
-        }
-        return nil
+        return notes.flatMap { try? YAMLDecoder().decode(from: $0) }
     }
 }
 
@@ -62,8 +50,6 @@ public struct Reminders: Procedure {
     struct Info: Codable {
         let repository: String?
         let branch: String?
-
-        static let marker = "--- reminder info ---"
     }
 
     public enum Scope {
@@ -228,10 +214,7 @@ public struct Reminders: Procedure {
             let reminder = EKReminder(eventStore: store)
             reminder.calendar = calendar
             reminder.title = title
-            reminder.notes = """
-            \(Reminders.Info.marker)
-            \((try? info.encoded()).flatMap { String(data: $0, encoding: .utf8) } ?? "")
-            """
+            reminder.notes = try? YAMLEncoder().encode(info)
             do {
                 try store.save(reminder, commit: false)
             } catch {

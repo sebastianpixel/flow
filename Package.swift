@@ -15,7 +15,8 @@ let package = Package(
         .package(url: "https://github.com/sebastianpixel/swift-commandlinekit", .branch("master")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.40.8"),
         .package(url: "https://github.com/Realm/SwiftLint", from: "0.32.0"),
-        .package(url: "https://github.com/orta/Komondor", from: "1.0.4")
+        .package(url: "https://github.com/orta/Komondor", from: "1.0.4"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0")
     ],
     targets: [
         .target(
@@ -28,7 +29,7 @@ let package = Package(
         ),
         .target(
             name: "Procedure",
-            dependencies: ["UI", "Request"]
+            dependencies: ["UI", "Request", "Yams"]
         ),
         .target(
             name: "UI",
