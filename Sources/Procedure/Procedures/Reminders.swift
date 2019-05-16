@@ -124,9 +124,8 @@ public struct Reminders: Procedure {
             }
         }).await() else { return false }
 
-        guard !reminders.isEmpty else {
+        if reminders.isEmpty {
             Env.current.shell.write("Everything done! No open reminders. \\o/")
-            return true
         }
 
         let initialLines = [""] + reminders.map { "  \($0.line)" } + [""]
