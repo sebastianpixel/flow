@@ -140,11 +140,8 @@ public final class CreatePullRequest: Procedure {
                 return Future.return(result)
             case .failure:
                 return
-                    GetLastCommits(stashProject: stashProject, repo: repo, limit: 500)
-                    .request()
-                    .map { result in
-                        result.flatMap { response -> Result<[String], Swift.Error> in
-                            let committers = response.values.map { $0.committer }.filter { $0.active }
+                    self.getCommitters(stashProject: stashProject, repo: repo).map { result in
+                        result.flatMap { committers -> Result<[String], Swift.Error> in
                             if !committers.isEmpty,
                                 let lineSelector = LineSelector(dataSource: GenericLineSelectorDataSource(items: Array(Set(committers)), line: \.description)),
                                 let selection = lineSelector.multiSelection() {

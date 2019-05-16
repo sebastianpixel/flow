@@ -32,11 +32,8 @@ public struct AssignIssue: Procedure {
             let username = Env.current.login.username
             result = PutIssueAssignee(issueKey: issueKey, username: username).request().await()
         } else {
-            result = GetLastCommits(stashProject: stashProject, repo: repo, limit: 500)
-                .request()
-                .await()
-                .flatMap { response -> Result<User, Swift.Error> in
-                    let committers = Set(response.values.map { $0.committer }).sorted { $0.name > $1.name }
+            result = getCommitters(stashProject: stashProject, repo: repo).map { result in
+                result.flatMap { committers -> Result<User, Swift.Error> in
                     guard
                         !committers.isEmpty,
                         let selector = LineSelector(dataSource: GenericLineSelectorDataSource(items: committers, line: \User.description)),
@@ -44,6 +41,8 @@ public struct AssignIssue: Procedure {
                     return .success(assignee)
                 }
                 .flatMap { PutIssueAssignee(issueKey: issueKey, username: $0.name).request().await() }
+            }
+            .await()
         }
 
         switch result {

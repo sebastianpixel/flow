@@ -1,6 +1,8 @@
 import Environment
+import Model
 import Request
 import UI
+import Utils
 
 public protocol Procedure {
     func run() -> Bool
@@ -32,5 +34,15 @@ extension Procedure {
         guard let projects = GetProjects().awaitResponseWithDebugPrinting() else { return nil }
         let dataSource = GenericLineSelectorDataSource(items: projects, line: \.description)
         return LineSelector(dataSource: dataSource)?.singleSelection()?.output?.key
+    }
+
+    func getCommitters(stashProject: String, repo: String) -> Future<Result<[User], Error>> {
+        return GetLastCommits(stashProject: stashProject, repo: repo, limit: 500)
+            .request()
+            .map { (result: Result<GetLastCommits.Response, Error>) -> Result<[User], Error> in
+                result.map { (response: GetLastCommits.Response) -> [User] in
+                    Set(response.values.compactMap { $0.committer.active ? $0.committer : nil }).sorted { $0.name > $1.name }
+                }
+            }
     }
 }
