@@ -35,18 +35,6 @@ public final class CreatePullRequest: Procedure {
             let repo = Env.current.git.currentRepo,
             let currentBranch = Env.current.git.currentBranch else { return false }
 
-        // prefetch current issue
-        currentIssueKey.map(GetIssue.init)?.request().onResult {
-            switch $0 {
-            case let .success(issue):
-                self.currentIssue = issue
-            case let .failure(failure) where Env.current.debug:
-                Env.current.shell.write("\(failure)")
-            default:
-                break
-            }
-        }
-
         let result = destinationBranch(parentBranch: parentBranch)
             .concat(reviewers(stashProject: stashProject, repo: repo, defaultReviewers: defaultReviewers))
             .map { branchResult, reviewersResult -> Result<(destinationBranch: String, reviewers: [String]), Swift.Error> in
@@ -160,15 +148,13 @@ public final class CreatePullRequest: Procedure {
         var destinationBranch = Future.return(Result<String, Swift.Error>.failure(Error.noBranchSelected))
 
         if parentBranch,
-            let parent = (currentIssue?.fields.parent?.key).flatMap({ key in allBranches.first { $0.contains(key) } }) {
-            destinationBranch = Future.return(.success(parent))
-        } else if parentBranch,
-            let jiraIssueKey = currentIssueKey {
-            destinationBranch = GetIssue(issueKey: jiraIssueKey)
+            let currentIssueKey = currentIssueKey {
+            destinationBranch = GetIssue(issueKey: currentIssueKey)
                 .request()
                 .map { result in
-                    result.flatMap { response -> Result<String, Swift.Error> in
-                        if let parentKey = response.fields.parent?.key,
+                    result.flatMap { [weak self] issue -> Result<String, Swift.Error> in
+                        self?.currentIssue = issue
+                        if let parentKey = issue.fields.parent?.key,
                             let parentBranch = allBranches.first(where: { $0.contains(parentKey) }) {
                             return .success(parentBranch)
                         } else {
@@ -204,11 +190,11 @@ public final class CreatePullRequest: Procedure {
             return .failure(Error.interactiveCommandFailed)
         }
 
-        let arrays = tempFile.parse(markSwitchToSecondBlockLinePrefix: "Description", markEndLinePrefix: nil)
-        let title = arrays.0.filter { !$0.isEmpty }.joined(separator: " ")
-        let description = arrays.1.joined(separator: "\n")
+        let arrays = tempFile.parse(markSwitchToSecondBlockLinePrefix: "# Description", markEndLinePrefix: nil)
+        let title = arrays.firstBlock.filter { !$0.isEmpty }.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        let description = arrays.secondBlock.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if title.isEmpty {
             return .failure(Error.noTitleProvided)
         } else {
             return .success((title, description))
