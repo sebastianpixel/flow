@@ -65,6 +65,7 @@ Options:
       Print the usage description of 'assign-issue'.
   -i, --issue <value>
       The key of the issue the user should be assigned to.
+      If not specified flow will try to get the issue key from the currently checked out branch.
   -s, --self
       Assign the issue to yourself.
   -u, --unassign

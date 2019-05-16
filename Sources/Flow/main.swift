@@ -366,7 +366,10 @@ Tool(name: toolName, arguments: arguments) { flow in
 
     flow.registerCommand("assign-issue", "assign", description: "Assign an issue to a user.") { cmd in
 
-        let issueKey = cmd.argument(String.self, shortName: "i", longName: "issue", description: "The key of the issue the user should be assigned to.")
+        let issueKey = cmd.argument(String.self, shortName: "i", longName: "issue", description: """
+        The key of the issue the user should be assigned to.
+              If not specified flow will try to get the issue key from the currently checked out branch.
+        """)
         let assignToSelf = cmd.option(shortName: "s", longName: "self", description: "Assign the issue to yourself.")
         let unassign = cmd.option(shortName: "u", longName: "unassign", description: "Remove assignee.")
 
