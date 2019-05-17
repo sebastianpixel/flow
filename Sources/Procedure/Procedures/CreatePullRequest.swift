@@ -22,7 +22,7 @@ public final class CreatePullRequest: Procedure {
     private let noEdit: Bool
 
     private var currentIssueKey = Env.current.jira.currentIssueKey(promptOnError: false)
-    private var currentIssue: Issue?
+    private lazy var currentIssue = { currentIssueKey.map(GetIssue.init)?.awaitResponseWithDebugPrinting() }()
 
     public init(defaultReviewers: Bool, parentBranch: Bool, noEdit: Bool) {
         self.defaultReviewers = defaultReviewers
@@ -35,7 +35,7 @@ public final class CreatePullRequest: Procedure {
             let repo = Env.current.git.currentRepo,
             let currentBranch = Env.current.git.currentBranch else { return false }
 
-        let result = destinationBranch(parentBranch: parentBranch)
+        let result = Future.return(destinationBranch(parentBranch: parentBranch))
             .concat(reviewers(stashProject: stashProject, repo: repo, defaultReviewers: defaultReviewers))
             .map { branchResult, reviewersResult -> Result<(destinationBranch: String, reviewers: [String]), Swift.Error> in
                 switch (branchResult, reviewersResult) {
@@ -143,36 +143,27 @@ public final class CreatePullRequest: Procedure {
         }
     }
 
-    private func destinationBranch(parentBranch: Bool) -> Future<Result<String, Swift.Error>> {
+    private func destinationBranch(parentBranch: Bool) -> Result<String, Swift.Error> {
         let allBranches = Env.current.git.branches(.all)
-        var destinationBranch = Future.return(Result<String, Swift.Error>.failure(Error.noBranchSelected))
+        var destinationBranch = Result<String, Swift.Error>.failure(Error.noBranchSelected)
 
-        if parentBranch,
-            let currentIssueKey = currentIssueKey {
-            destinationBranch = GetIssue(issueKey: currentIssueKey)
-                .request()
-                .map { result in
-                    result.flatMap { [weak self] issue -> Result<String, Swift.Error> in
-                        self?.currentIssue = issue
-                        if let parentKey = issue.fields.parent?.key,
-                            let parentBranch = allBranches.first(where: { $0.contains(parentKey) }) {
-                            return .success(parentBranch)
-                        } else {
-                            Env.current.shell.write("Could not find parent branch. Please choose one from the following:")
-                            return .failure(Error.noBranchSelected)
-                        }
-                    }
-                }
+        if parentBranch {
+            if let currentIssue = currentIssue,
+                let parentKey = currentIssue.fields.parent?.key,
+                let parentBranch = allBranches.first(where: { $0.contains(parentKey) }) {
+                destinationBranch = .success(parentBranch)
+            } else {
+                Env.current.shell.write("Could not find parent branch. Please choose one from the following:")
+                destinationBranch = .failure(Error.noBranchSelected)
+            }
         }
 
-        return destinationBranch.map { result in
-            result.flatMapError { error -> Result<String, Swift.Error> in
-                let dataSource = GenericLineSelectorDataSource(items: allBranches)
-                if let branch = LineSelector(dataSource: dataSource)?.singleSelection()?.output {
-                    return .success(branch)
-                } else {
-                    return .failure(error)
-                }
+        return destinationBranch.flatMapError { error -> Result<String, Swift.Error> in
+            let dataSource = GenericLineSelectorDataSource(items: allBranches)
+            if let branch = LineSelector(dataSource: dataSource)?.singleSelection()?.output {
+                return .success(branch)
+            } else {
+                return .failure(error)
             }
         }
     }
