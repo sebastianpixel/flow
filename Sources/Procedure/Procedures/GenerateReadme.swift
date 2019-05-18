@@ -29,6 +29,7 @@ public struct GenerateReadme: Procedure {
                 * existing JIRA issue types,
                 * (branch) naming conventions,
                 * the URLs of stash & JIRA (as subdomains of 'company.com', which is retrieved from 'git remote -v')
+                * the login is global and not based on the repo for example
                 * and probably a few things more…
 
                 flow is also a playground for me to try out things in Swift, the Swift Package Manager and in general to learn about new things I come across while implementing new features.
