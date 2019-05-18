@@ -2,98 +2,99 @@ import Foundation
 import Security
 
 public protocol Keychain {
-    func save(password: String, account: String) throws
-    func load(account: String) throws -> String?
-    func update(password: String, account: String) throws
-    func remove(account: String) throws
+    func create(password: String, account: String) -> Result<Void, Swift.Error>
+    func read(account: String) -> Result<String?, Swift.Error>
+    func update(password: String, account: String) -> Result<Void, Swift.Error>
+    func delete(account: String) -> Result<Void, Swift.Error>
 }
 
 struct KeychainImpl: Keychain {
     struct Error: Swift.Error {
-        let action: Action
-        let error: String
+        let message: String
+    }
 
-        enum Action: String {
-            case read, update, remove, write, retrieve
+    private func data(from string: String) -> Result<Data, Swift.Error> {
+        if let data = string.data(using: .utf8, allowLossyConversion: false) {
+            return .success(data)
+        } else {
+            return .failure(Error(message: "Could not transform \(string) to data."))
         }
     }
 
-    func update(password: String, account: String) throws {
-        guard let dataFromString = password.data(using: String.Encoding.utf8, allowLossyConversion: false) else { return }
-        let keychainQuery = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: Env.current.toolName,
-            kSecAttrAccount: account
-        ] as CFDictionary
+    func create(password: String, account: String) -> Result<Void, Swift.Error> {
+        return data(from: password).flatMap { data in
+            let query: NSDictionary = [
+                kSecClass: kSecClassGenericPassword,
+                kSecAttrService: Env.current.toolName,
+                kSecAttrAccount: account,
+                kSecValueData: data
+            ]
 
-        let status = SecItemUpdate(keychainQuery, [kSecValueData: dataFromString] as CFDictionary)
+            let status = SecItemAdd(query, nil)
 
-        if status != errSecSuccess,
-            let error = SecCopyErrorMessageString(status, nil) {
-            throw Error(action: .read, error: error as String)
-        }
-    }
-
-    func remove(account: String) throws {
-        let keychainQuery = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: Env.current.toolName,
-            kSecAttrAccount: account,
-            kSecReturnData: kCFBooleanTrue!
-        ] as CFDictionary
-
-        let status = SecItemDelete(keychainQuery)
-
-        if status != errSecSuccess,
-            let error = SecCopyErrorMessageString(status, nil) {
-            throw Error(action: .remove, error: error as String)
-        }
-    }
-
-    func save(password: String, account: String) throws {
-        guard let dataFromString = password.data(using: String.Encoding.utf8,
-                                                 allowLossyConversion: false) else { return }
-
-        let keychainQuery = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: Env.current.toolName,
-            kSecAttrAccount: account,
-            kSecValueData: dataFromString
-        ] as CFDictionary
-
-        let status = SecItemAdd(keychainQuery, nil)
-
-        if status != errSecSuccess,
-            let error = SecCopyErrorMessageString(status, nil) {
-            throw Error(action: .write, error: error as String)
-        }
-    }
-
-    func load(account: String) throws -> String? {
-        // Instantiate a new default keychain query
-        // Tell the query to return a result
-        // Limit our results to one item
-        let keychainQuery = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: Env.current.toolName,
-            kSecAttrAccount: account,
-            kSecReturnData: kCFBooleanTrue!,
-            kSecMatchLimit: kSecMatchLimitOne
-        ] as CFDictionary
-
-        var dataTypeRef: CFTypeRef?
-
-        let status = SecItemCopyMatching(keychainQuery, &dataTypeRef)
-        var contentsOfKeychain: String?
-
-        if status == errSecSuccess {
-            if let retrievedData = dataTypeRef as? Data {
-                contentsOfKeychain = String(data: retrievedData, encoding: .utf8)
+            if status != errSecSuccess,
+                let error = SecCopyErrorMessageString(status, nil) {
+                return .failure(Error(message: error as String))
             }
-        } else if let error = SecCopyErrorMessageString(status, nil) {
-            throw Error(action: .retrieve, error: error as String)
+            return .success(())
         }
+    }
 
-        return contentsOfKeychain
+    func read(account: String) -> Result<String?, Swift.Error> {
+        let query: NSDictionary = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: Env.current.toolName,
+            kSecAttrAccount: account,
+            kSecReturnData: true,
+            kSecMatchLimit: kSecMatchLimitOne
+        ]
+
+        var ref: CFTypeRef?
+
+        let status = SecItemCopyMatching(query, &ref)
+
+        return Result<String?, Swift.Error> {
+            if status != errSecSuccess,
+                let error = SecCopyErrorMessageString(status, nil) {
+                throw Error(message: error as String)
+            }
+
+            return (ref as? Data).flatMap { String(data: $0, encoding: .utf8) }
+        }
+    }
+
+    func update(password: String, account: String) -> Result<Void, Swift.Error> {
+        return data(from: password).flatMap { data in
+            let query: NSDictionary = [
+                kSecClass: kSecClassGenericPassword,
+                kSecAttrService: Env.current.toolName,
+                kSecAttrAccount: account
+            ]
+
+            let status = SecItemUpdate(query, [kSecValueData: data] as NSDictionary)
+
+            if status != errSecSuccess,
+                let error = SecCopyErrorMessageString(status, nil) {
+                return .failure(Error(message: error as String))
+            }
+            return .success(())
+        }
+    }
+
+    func delete(account: String) -> Result<Void, Swift.Error> {
+        let query: NSDictionary = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: Env.current.toolName,
+            kSecAttrAccount: account,
+            kSecReturnData: true
+        ]
+
+        let status = SecItemDelete(query)
+
+        if status != errSecSuccess,
+            let error = SecCopyErrorMessageString(status, nil) {
+            return .failure(Error(message: error as String))
+        }
+        return .success(())
     }
 }

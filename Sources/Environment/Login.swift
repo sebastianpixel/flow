@@ -3,89 +3,84 @@ import Foundation
 public protocol Login {
     var username: String { get }
     var password: String { get }
+
     func renew(prompt: Bool) -> Result<Login, Error>
 }
 
 final class LoginImpl: Login {
+    enum Error: Swift.Error {
+        case optOut, noPassword
+    }
+
     lazy var username: String = {
-        do {
-            return try getUsername().get()
-        } catch {
-            Env.current.shell.write("\(error)")
+        switch getUsername() {
+        case let .success(success):
+            return success
+        case let .failure(failure):
+            Env.current.shell.write("\(failure)")
             exit(EXIT_FAILURE)
         }
     }()
 
     lazy var password: String = {
-        do {
-            return try getPassword(for: username).get()
-        } catch {
-            Env.current.shell.write("\(error)")
+        switch getPassword(for: username) {
+        case let .success(success):
+            return success
+        case let .failure(failure):
+            Env.current.shell.write("\(failure)")
             exit(EXIT_FAILURE)
         }
     }()
 
-    func renew(prompt: Bool = true) -> Result<Login, Error> {
+    func renew(prompt: Bool = true) -> Result<Login, Swift.Error> {
         if prompt, !Env.current.shell.promptDecision("Want to reset the login?") {
-            exit(EXIT_SUCCESS)
+            return .failure(Error.optOut)
         }
 
-        return Result<Login, Error> {
-            do {
-                try Env.current.keychain.remove(account: username)
-            } catch {
-                Env.current.shell.write("Error removing login from Keychain: \(error)")
-                Env.current.shell.write("Will try to create a new login.")
-            }
-
-            Env.current.defaults.removeObject(for: .username)
-
-            let login = LoginImpl()
-            _ = login.password
-            return login
+        switch Env.current.keychain.delete(account: username) {
+        case let .failure(failure):
+            Env.current.shell.write("Error removing login from Keychain: \(failure)")
+            Env.current.shell.write("Will try to create a new login.")
+        default:
+            break
         }
+
+        Env.current.defaults.removeObject(for: .username)
+
+        let login = LoginImpl()
+        _ = login.password
+        return .success(login)
     }
 
-    private func getUsername() -> Result<String, Error> {
-        return Result<String, Error> {
-            if let username = Env.current.defaults.get(String.self, for: .username) {
+    private func getUsername() -> Result<String, Swift.Error> {
+        return Result<String, Swift.Error> {
+            if let username = Env.current.defaults[.username] as String? {
                 return username
             } else {
-                guard let username = Env.current.shell.prompt("Enter your JIRA username"),
+                guard let username = Env.current.shell.prompt("Enter your JIRA username", newline: false, silent: false),
                     !username.isEmpty else {
                     return try renew().get().username
                 }
-                Env.current.defaults.set(username, for: .username)
+                Env.current.defaults[.username] = username
                 return username
             }
         }
     }
 
-    private func getPassword(for username: String) -> Result<String, Error> {
-        return Result<String, Error> {
-            if let password = try? Env.current.keychain.load(account: username) {
-                return password
+    private func getPassword(for username: String) -> Result<String, Swift.Error> {
+        return Env.current.keychain.read(account: username)
+            .flatMapError { _ -> Result<String?, Swift.Error> in
+                let password = Env.current.shell.prompt("Enter your JIRA password", newline: false, silent: true)
+                if password?.isEmpty ?? true {
+                    return renew().map { $0.password }
+                } else {
+                    return .success(password)
+                }
             }
-
-            let password: String
-            if let pw = Env.current.shell.prompt("Enter your JIRA password", silent: true), !pw.isEmpty {
-                password = pw
-            } else {
-                password = try renew().get().password
+            .flatMap { password -> Result<(String, Void), Swift.Error> in
+                guard let password = password else { return .failure(Error.noPassword) }
+                return Env.current.keychain.create(password: password, account: username).map { (password, $0) }
             }
-            try Env.current.keychain.save(password: password, account: username)
-
-            return password
-        }
-    }
-}
-
-struct LoginMock: Login {
-    let username = "UsernameMock"
-
-    let password = "PasswordMock"
-
-    func renew(prompt _: Bool) -> Result<Login, Error> {
-        return .success(self)
+            .map { $0.0 }
     }
 }
