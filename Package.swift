@@ -73,12 +73,15 @@ let package = Package(
     // so changes can be reviewed.
     // https://github.com/nicholascross/Injectable/blob/master/Package.swift
     private let autoCorrect = #"""
-    git diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
+    git --no-pager diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
     swift run swiftformat . --disable strongifiedSelf --commas inline --swiftversion 5
     swift run swiftlint autocorrect --path Sources/ Tests/
-    git diff --staged --name-only | xargs git diff | md5 > .post_format_hash
+    git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
     diff .pre_format_hash .post_format_hash > /dev/null || {
-        echo "Staged files modified during commit" ; rm .pre_format_hash ; rm .post_format_hash ; exit 1
+        echo "Staged files modified during commit"
+        rm .pre_format_hash
+        rm .post_format_hash
+        exit 1
     }
     rm .pre_format_hash
     rm .post_format_hash
