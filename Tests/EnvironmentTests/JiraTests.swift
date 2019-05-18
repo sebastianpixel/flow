@@ -20,7 +20,7 @@ class JiraTest: XCTestCase {
         git.domainCallback = git.currentBranchCallback
 
         let shell = Env.current.shell as! ShellMock
-        shell.writeWithTerminatorCallback = { text, _ in
+        shell.writeCallback = { text in
             self.commands.append(text)
         }
         shell.promptCallback = {

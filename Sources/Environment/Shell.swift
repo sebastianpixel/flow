@@ -5,18 +5,13 @@ public protocol Shell {
     var editor: String { get }
 
     func prompt(_ str: String) -> String?
-    func prompt(_ str: String, silent: Bool) -> String?
+    func prompt(_ str: String, newline: Bool, silent: Bool) -> String?
     func promptDecision(_ str: String) -> Bool
+    func write(_ text: String)
     func write(_ text: String, terminator: String)
     func run(_ command: String) -> Bool
     func run(_ command: String) -> String?
     func runForegroundTask(_ command: String) -> Bool
-}
-
-public extension Shell {
-    func write(_ text: String) {
-        write(text, terminator: "\n")
-    }
 }
 
 struct ShellImpl: Shell {
@@ -25,15 +20,18 @@ struct ShellImpl: Shell {
     }
 
     func prompt(_ str: String) -> String? {
-        return prompt(str, silent: false)
+        return prompt(str, newline: true, silent: false)
     }
 
-    func prompt(_ str: String, silent: Bool) -> String? {
+    func prompt(_ str: String, newline: Bool, silent: Bool) -> String? {
         let template = "\(Prompt().prefix)\(str): "
         if silent {
+            if newline {
+                write("")
+            }
             return String(cString: getpass(template))
         } else {
-            write(template)
+            write(template, terminator: newline ? "\n" : "")
             return readLine()
         }
     }
@@ -41,6 +39,10 @@ struct ShellImpl: Shell {
     func promptDecision(_ str: String) -> Bool {
         let answer = prompt(str + " [y/N]")
         return answer.map { ["y", "Y", ""].contains($0.trimmingCharacters(in: .whitespaces)) } == true
+    }
+
+    func write(_ text: String) {
+        write(text, terminator: "\n")
     }
 
     func write(_ text: String, terminator: String) {

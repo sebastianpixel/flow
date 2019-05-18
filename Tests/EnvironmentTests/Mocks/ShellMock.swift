@@ -11,14 +11,19 @@ class ShellMock: Shell {
         return promptCallback(str)
     }
 
-    var promptSilentCallback: (String, Bool) -> String? = { _, _ in nil }
-    func prompt(_ str: String, silent: Bool) -> String? {
-        return promptSilentCallback(str, silent)
+    var promptWithNewlineAndSilentCallback: (String, Bool, Bool) -> String? = { _, _, _ in nil }
+    func prompt(_ str: String, newline: Bool, silent: Bool) -> String? {
+        return promptWithNewlineAndSilentCallback(str, newline, silent)
     }
 
     var promptDecisionCallback: (String) -> Bool = { _ in false }
     func promptDecision(_ str: String) -> Bool {
         return promptDecisionCallback(str)
+    }
+
+    var writeCallback: (String) -> Void = { _ in }
+    func write(_ text: String) {
+        writeCallback(text)
     }
 
     var writeWithTerminatorCallback: (String, String) -> Void = { _, _ in }
