@@ -34,8 +34,8 @@ public struct CreateCommit: Procedure {
         // In this case the template is pupulated with the previous values to avoid having to
         // retype the message.
 
-        if let lastCommitSubject = Env.current.defaults.get(String.self, for: .lastCommitSubject),
-            let lastCommitBody = Env.current.defaults.get(String.self, for: .lastCommitBody) {
+        if let lastCommitSubject = Env.current.defaults[.lastCommitSubject] as String?,
+            let lastCommitBody = Env.current.defaults[.lastCommitBody] as String? {
             subject = lastCommitSubject
             body = lastCommitBody.isEmpty ? "" : "\(lastCommitBody)\n"
         }
@@ -67,8 +67,8 @@ public struct CreateCommit: Procedure {
         let commitWasSuccessful = Env.current.git.commit(message: message)
 
         if !commitWasSuccessful {
-            Env.current.defaults.set(subject, for: .lastCommitSubject)
-            Env.current.defaults.set(body, for: .lastCommitBody)
+            Env.current.defaults[.lastCommitSubject] = subject
+            Env.current.defaults[.lastCommitBody] = body
         } else {
             Env.current.defaults.removeObject(for: .lastCommitSubject)
             Env.current.defaults.removeObject(for: .lastCommitBody)

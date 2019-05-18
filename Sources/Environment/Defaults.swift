@@ -1,13 +1,21 @@
 import Foundation
 
 public protocol Defaults {
+    subscript<Value: DefaultsValue>(_: DefaultsKey) -> Value? { get set }
+
     func get<Value: DefaultsValue>(for key: DefaultsKey) -> Value?
     func get<Value: DefaultsValue>(_ type: Value.Type, for key: DefaultsKey) -> Value?
     func set<Value: DefaultsValue>(_ value: Value, for key: DefaultsKey)
+
     func removeObject(for key: DefaultsKey)
 }
 
 struct DefaultsImpl: Defaults {
+    subscript<Value: DefaultsValue>(key: DefaultsKey) -> Value? {
+        get { return get(Value.self, for: key) }
+        set { newValue.map { set($0, for: key) } ?? removeObject(for: key) }
+    }
+
     func get<Value>(for key: DefaultsKey) -> Value? where Value: DefaultsValue {
         return get(Value.self, for: key)
     }
