@@ -7,22 +7,6 @@ import Utils
 import Yams
 
 extension EKReminder {
-    var line: String {
-        if let info = info {
-            var line = [String]()
-            if let repository = info.repository,
-                repository != Env.current.git.currentRepo {
-                line.append("repo: \(repository)")
-            }
-            if let branch = info.branch,
-                branch != Env.current.git.currentBranch {
-                line.append("branch: \(branch)")
-            }
-            return "\(title ?? "")\(line.isEmpty ? "" : " (\(line.joined(separator: ", ")))")"
-        }
-        return title
-    }
-
     var info: Reminders.Info? {
         return notes.flatMap { try? YAMLDecoder().decode(from: $0) }
     }
@@ -58,13 +42,13 @@ public struct Reminders: Procedure {
 
     private let scope: Scope
     private let lineReader: LineReader
-    private let reminderToAdd: String?
+    private let remindersToAdd: [String]
 
-    public init(scope: Scope, reminderToAdd: String?) {
+    public init(scope: Scope, remindersToAdd: [String]) {
         guard let lineReader = LineReader() else { fatalError("Could not create LineReader") }
         self.lineReader = lineReader
         self.scope = scope
-        self.reminderToAdd = reminderToAdd
+        self.remindersToAdd = remindersToAdd
     }
 
     public func run() -> Bool {
@@ -87,8 +71,16 @@ public struct Reminders: Procedure {
             return false
         }
 
-        if let reminderToAdd = reminderToAdd {
-            return add(titles: [reminderToAdd], store: store, calendar: calendar, lineDrawer: .init(linesToDrawCount: 0))
+        if !remindersToAdd.isEmpty {
+            let comma = CharacterSet(charactersIn: ",")
+            let titles = remindersToAdd.reduce(into: [String]()) { accumulated, current in
+                let trimmed = current.trimmingCharacters(in: comma)
+                guard !trimmed.isEmpty else { return }
+                accumulated.append(trimmed)
+            }
+            guard add(titles: titles, store: store, calendar: calendar, lineDrawer: .init(linesToDrawCount: 0)) else {
+                return false
+            }
         }
 
         let predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: nil, calendars: nil)
@@ -114,16 +106,16 @@ public struct Reminders: Procedure {
             Env.current.shell.write("Everything done! No open reminders. \\o/")
         }
 
-        let initialLines = [""] + reminders.map { "  \($0.line)" } + [""]
+        let initialLines = [""] + reminders.map { "  \(createLine(for: $0))" } + [""]
 
         let lineDrawer = LineDrawer(linesToDrawCount: initialLines.count)
         lineDrawer.drawLines(initialLines)
 
+        let remindersDataSource = GenericLineSelectorDataSource(items: reminders, line: createLine)
+
         let actions = GenericLineSelectorDataSource(items: Reminders.Action.allCases, line: \.description)
         guard let (input, output) = LineSelector(dataSource: actions)?.singleSelection(),
             let action = Reminders.Action.allCases.first(where: { String($0.shortcut) == input }) ?? output else { return true }
-
-        let remindersDataSource = { GenericLineSelectorDataSource(items: reminders) { $0.line } }
 
         lineDrawer.reset()
 
@@ -148,9 +140,9 @@ public struct Reminders: Procedure {
         }
     }
 
-    private func completeOrRemove(action: Action, store: EKEventStore, remindersDataSource: () -> GenericLineSelectorDataSource<EKReminder>, lineDrawer: LineDrawer) -> Bool {
+    private func completeOrRemove(action: Action, store: EKEventStore, remindersDataSource: GenericLineSelectorDataSource<EKReminder>, lineDrawer: LineDrawer) -> Bool {
         Env.current.shell.write("")
-        guard let relevantReminders = LineSelector(dataSource: remindersDataSource())?.multiSelection()?.output,
+        guard let relevantReminders = LineSelector(dataSource: remindersDataSource)?.multiSelection()?.output,
             !relevantReminders.isEmpty else { return true }
         relevantReminders.forEach { reminder in
             do {
@@ -180,9 +172,9 @@ public struct Reminders: Procedure {
         return true
     }
 
-    private func edit(store: EKEventStore, remindersDataSource: () -> GenericLineSelectorDataSource<EKReminder>, lineDrawer: LineDrawer) -> Bool {
+    private func edit(store: EKEventStore, remindersDataSource: GenericLineSelectorDataSource<EKReminder>, lineDrawer: LineDrawer) -> Bool {
         Env.current.shell.write("")
-        guard let reminder = LineSelector(dataSource: remindersDataSource())?.singleSelection()?.output,
+        guard let reminder = LineSelector(dataSource: remindersDataSource)?.singleSelection()?.output,
             let newTitle = try? lineReader.readLine(prompt: "Edit reminder: ", line: reminder.title),
             !newTitle.isEmpty else { return true }
         reminder.title = newTitle
@@ -230,5 +222,24 @@ public struct Reminders: Procedure {
         Env.current.shell.write("Added \(titles.map { "\"\($0)\"" }.joined(separator: ", ")).")
 
         return true
+    }
+
+    private var repoCache = Env.current.git.currentRepo
+    private var branchCache = Env.current.git.currentBranch
+
+    private func createLine(for reminder: EKReminder) -> String {
+        if let info = reminder.info {
+            var line = [String]()
+            if let repository = info.repository,
+                repository != repoCache {
+                line.append("repo: \(repository)")
+            }
+            if let branch = info.branch,
+                branch != branchCache {
+                line.append("branch: \(branch)")
+            }
+            return "\(reminder.title ?? "")\(line.isEmpty ? "" : " (\(line.joined(separator: ", ")))")"
+        }
+        return reminder.title
     }
 }

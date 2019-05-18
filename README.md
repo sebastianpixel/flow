@@ -222,14 +222,14 @@ Options:
 flow reminders, todos, todo, td <options>
 Show and edit todos from iCloud reminders.
 Options:
+  -A, --add <value> ...
+      Directly add new reminders (comma separated).
   -a, --all
       Show all reminders instead of those from current repository (default).
   -b, --branch
       Show only reminders created with the current branch checked out.
   -h, --help
       Print the usage description of 'reminders'.
-  -r, --reminder <value> ...
-      Directly add a new reminder.
 
 flow remove-branch, rmb <options>
 Remove local (default) or remote branches.

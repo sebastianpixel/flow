@@ -366,12 +366,19 @@ Tool(name: toolName, arguments: arguments) { flow in
 
     flow.registerCommand("assign-issue", "assign", description: "Assign an issue to a user.") { cmd in
 
-        let issueKey = cmd.argument(String.self, shortName: "i", longName: "issue", description: """
-        The key of the issue the user should be assigned to.
-              If not specified flow will try to get the issue key from the currently checked out branch.
-        """)
-        let assignToSelf = cmd.option(shortName: "s", longName: "self", description: "Assign the issue to yourself.")
-        let unassign = cmd.option(shortName: "u", longName: "unassign", description: "Remove assignee.")
+        let issueKey = cmd.argument(String.self,
+                                    shortName: "i",
+                                    longName: "issue",
+                                    description: """
+                                    The key of the issue the user should be assigned to.
+                                          If not specified flow will try to get the issue key from the currently checked out branch.
+                                    """)
+        let assignToSelf = cmd.option(shortName: "s",
+                                      longName: "self",
+                                      description: "Assign the issue to yourself.")
+        let unassign = cmd.option(shortName: "u",
+                                  longName: "unassign",
+                                  description: "Remove assignee.")
 
         cmd.handler {
             run(AssignIssue(issueKey: issueKey.value, assignToSelf: assignToSelf.wasSet, unassign: unassign.wasSet))
@@ -380,9 +387,16 @@ Tool(name: toolName, arguments: arguments) { flow in
 
     flow.registerCommand("reminders", "todos", "todo", "td", description: "Show and edit todos from iCloud reminders.") { cmd in
 
-        let showAll = cmd.option(shortName: "a", longName: "all", description: "Show all reminders instead of those from current repository (default).")
-        let showOnlyBranch = cmd.option(shortName: "b", longName: "branch", description: "Show only reminders created with the current branch checked out.")
-        let reminderToAdd = cmd.arguments(String.self, shortName: "r", longName: "reminder", description: "Directly add a new reminder.")
+        let showAll = cmd.option(shortName: "a",
+                                 longName: "all",
+                                 description: "Show all reminders instead of those from current repository (default).")
+        let showOnlyBranch = cmd.option(shortName: "b",
+                                        longName: "branch",
+                                        description: "Show only reminders created with the current branch checked out.")
+        let remindersToAdd = cmd.arguments(String.self,
+                                           shortName: "A",
+                                           longName: "add",
+                                           description: "Directly add new reminders (comma separated).")
 
         cmd.handler {
             let scope: Reminders.Scope
@@ -393,9 +407,7 @@ Tool(name: toolName, arguments: arguments) { flow in
             } else {
                 scope = .repo
             }
-            let reminderToAdd = reminderToAdd.value.joined(separator: " ")
-            let reminder = reminderToAdd.isEmpty ? nil : reminderToAdd
-            run(Reminders(scope: scope, reminderToAdd: reminder))
+            run(Reminders(scope: scope, remindersToAdd: remindersToAdd.value))
         }
     }
 }
