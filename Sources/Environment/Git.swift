@@ -123,11 +123,19 @@ class GitImpl: Git {
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String] {
         let cmd = "git branch --sort=-committerdate \(branchType.flag)"
         let currentBranch = self.currentBranch
-        return (Env.current.shell.run(cmd)?
+        guard let output = Env.current.shell.run(cmd) else { return [] }
+
+        let branches = output
             .components(separatedBy: .newlines)
             .map { $0.replacingOccurrences(of: #"^(\*\s|\s*remotes/origin/|\s*remotes/fork/)"#, with: "", options: .regularExpression).trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.contains("HEAD") && (excludeCurrent ? ($0 != currentBranch) : true) })
-            .flatMap { NSOrderedSet(array: $0).array as? [String] } ?? []
+            .filter { !$0.contains("HEAD") && (excludeCurrent ? ($0 != currentBranch) : true) }
+
+        var set = Set<String>()
+        return branches.reduce(into: [String]()) { branches, branch in
+            if set.insert(branch).inserted {
+                branches.append(branch)
+            }
+        }
     }
 
     var conflictedFiles: [String] {

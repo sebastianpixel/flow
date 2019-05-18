@@ -85,7 +85,10 @@ public struct BrowseGit: Procedure {
             pathComponents = [project, repo, "tree", branch, directory]
         }
 
-        let path = "/\(pathComponents.compactMap { $0 }.joined(separator: "/"))"
+        let path = pathComponents.reduce(into: "") { path, component in
+            guard let component = component else { return }
+            path += "/\(component)"
+        }
 
         guard let url = URL(string: "https://\(host)\(path)") else { return false }
 

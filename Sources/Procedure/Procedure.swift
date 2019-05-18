@@ -37,11 +37,17 @@ extension Procedure {
     }
 
     func getCommitters(stashProject: String, repo: String) -> Future<Result<[User], Error>> {
-        return GetLastCommits(stashProject: stashProject, repo: repo, limit: 500)
+        return GetLastCommits(stashProject: stashProject, repo: repo, limit: 250)
             .request()
-            .map { (result: Result<GetLastCommits.Response, Error>) -> Result<[User], Error> in
-                result.map { (response: GetLastCommits.Response) -> [User] in
-                    Set(response.values.compactMap { $0.committer.active ? $0.committer : nil }).sorted { $0.name > $1.name }
+            .map { result -> Result<[User], Error> in
+                result.map { response -> [User] in
+                    var set = Set<User>()
+                    return response.values
+                        .reduce(into: [User]()) { users, commit in
+                            guard commit.committer.active, set.insert(commit.committer).inserted else { return }
+                            users.append(commit.committer)
+                        }
+                        .sorted { $0.name > $1.name }
                 }
             }
     }
