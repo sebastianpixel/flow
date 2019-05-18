@@ -11,6 +11,21 @@ public protocol Keychain {
 struct KeychainImpl: Keychain {
     struct Error: Swift.Error {
         let message: String
+
+        init(message: String) {
+            self.message = message
+        }
+
+        init(status: OSStatus, account: String) {
+            switch status {
+            case errSecItemNotFound:
+                message = "Password for \"\(account)\" was not found."
+            case errSecIO:
+                message = "IO went bad. Account: \(account)."
+            default:
+                message = SecCopyErrorMessageString(status, nil) as String? ?? "Status: \(status)" + ". Account: \(account)"
+            }
+        }
     }
 
     private func data(from string: String) -> Result<Data, Swift.Error> {
@@ -32,10 +47,10 @@ struct KeychainImpl: Keychain {
 
             let status = SecItemAdd(query, nil)
 
-            if status != errSecSuccess,
-                let error = SecCopyErrorMessageString(status, nil) {
-                return .failure(Error(message: error as String))
+            guard status == errSecSuccess else {
+                return .failure(Error(status: status, account: account))
             }
+
             return .success(())
         }
     }
@@ -53,14 +68,11 @@ struct KeychainImpl: Keychain {
 
         let status = SecItemCopyMatching(query, &ref)
 
-        return Result<String?, Swift.Error> {
-            if status != errSecSuccess,
-                let error = SecCopyErrorMessageString(status, nil) {
-                throw Error(message: error as String)
-            }
-
-            return (ref as? Data).flatMap { String(data: $0, encoding: .utf8) }
+        guard status == errSecSuccess else {
+            return .failure(Error(status: status, account: account))
         }
+
+        return .success((ref as? Data).flatMap { String(data: $0, encoding: .utf8) })
     }
 
     func update(password: String, account: String) -> Result<Void, Swift.Error> {
@@ -73,10 +85,10 @@ struct KeychainImpl: Keychain {
 
             let status = SecItemUpdate(query, [kSecValueData: data] as NSDictionary)
 
-            if status != errSecSuccess,
-                let error = SecCopyErrorMessageString(status, nil) {
-                return .failure(Error(message: error as String))
+            guard status == errSecSuccess else {
+                return .failure(Error(status: status, account: account))
             }
+
             return .success(())
         }
     }
@@ -91,10 +103,10 @@ struct KeychainImpl: Keychain {
 
         let status = SecItemDelete(query)
 
-        if status != errSecSuccess,
-            let error = SecCopyErrorMessageString(status, nil) {
-            return .failure(Error(message: error as String))
+        guard status == errSecSuccess else {
+            return .failure(Error(status: status, account: account))
         }
+
         return .success(())
     }
 }
