@@ -6,9 +6,9 @@ import UI
 import Utils
 import Yams
 
-extension EKReminder {
+private extension EKReminder {
     var info: Reminders.Info? {
-        return notes.flatMap { try? YAMLDecoder().decode(from: $0) }
+        return notes.flatMap { try? Reminders.yamlDecoder.decode(from: $0) }
     }
 }
 
@@ -21,13 +21,15 @@ public struct Reminders: Procedure {
         }
 
         var description: String {
+            let desc: String
             switch self {
-            case .add: return "(a) add new reminders"
-            case .edit: return "(e) edit reminder"
-            case .complete: return "(c) mark reminders as completed"
-            case .remove: return "(r) remove reminders"
-            case .quit: return "(q) quit \(Env.current.toolName)"
+            case .add: desc = "add new reminders"
+            case .edit: desc = "edit reminder"
+            case .complete: desc = "mark reminders as completed"
+            case .remove: desc = "remove reminders"
+            case .quit: desc = "quit \(Env.current.toolName)"
             }
+            return "(\(shortcut)) \(desc)"
         }
     }
 
@@ -43,6 +45,9 @@ public struct Reminders: Procedure {
     private let scope: Scope
     private let lineReader: LineReader
     private let remindersToAdd: [String]
+
+    private static let yamlEncoder = YAMLEncoder()
+    fileprivate static let yamlDecoder = YAMLDecoder()
 
     public init(scope: Scope, remindersToAdd: [String]) {
         guard let lineReader = LineReader() else { fatalError("Could not create LineReader") }
@@ -206,7 +211,7 @@ public struct Reminders: Procedure {
             let reminder = EKReminder(eventStore: store)
             reminder.calendar = calendar
             reminder.title = title
-            reminder.notes = try? YAMLEncoder().encode(info)
+            reminder.notes = try? Reminders.yamlEncoder.encode(info)
             do {
                 try store.save(reminder, commit: false)
             } catch {
