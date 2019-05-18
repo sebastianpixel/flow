@@ -12,7 +12,7 @@ public extension Jira {
 
 struct JiraImpl: Jira {
     var currentProject: String? {
-        return currentIssueKey(promptOnError: true)?.extracting(.uppercasesPattern)
+        return currentIssueKey(promptOnError: false)?.extracting(.uppercasesPattern)
     }
 
     func currentIssueKey(promptOnError: Bool) -> String? {

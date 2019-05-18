@@ -14,7 +14,7 @@ extension Procedure {
     func getIssueKey(from rawKey: String?) -> String? {
         return rawKey?.extracting(.jiraIssueKeyPattern)
             ?? rawKey?.extracting(.numbersPattern).flatMap { number -> String? in
-                Env.current.jira.currentProject.map { "\($0)-\(number)" }
+                (Env.current.jira.currentProject ?? getProjectFromAllAvailable()).map { "\($0)-\(number)" }
                     ?? Env.current.git.branch(containing: number, excludeCurrent: false)?.extracting(.jiraIssueKeyPattern)
             }
             ?? Env.current.jira.currentIssueKey()
