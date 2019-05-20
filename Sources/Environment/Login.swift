@@ -68,19 +68,25 @@ final class LoginImpl: Login {
     }
 
     private func getPassword(for username: String) -> Result<String, Swift.Error> {
-        return Env.current.keychain.read(account: username)
-            .flatMapError { _ -> Result<String?, Swift.Error> in
-                let password = Env.current.shell.prompt("Enter your JIRA password", newline: false, silent: true)
-                if password?.isEmpty ?? true {
-                    return renew().map { $0.password }
-                } else {
-                    return .success(password)
+        let password = Env.current.keychain.read(account: username)
+
+        switch password {
+        case let .success(success?):
+            return .success(success)
+        case let .failure(failure):
+            Env.current.shell.write("\(failure)")
+        default:
+            break
+        }
+
+        if let newPassword = Env.current.shell.prompt("Enter your JIRA password", newline: false, silent: true), !newPassword.isEmpty {
+            return renew()
+                .flatMap { login -> Result<(String, Void), Swift.Error> in
+                    Env.current.keychain.create(password: login.password, account: login.username).map { (login.password, $0) }
                 }
-            }
-            .flatMap { password -> Result<(String, Void), Swift.Error> in
-                guard let password = password else { return .failure(Error.noPassword) }
-                return Env.current.keychain.create(password: password, account: username).map { (password, $0) }
-            }
-            .map { $0.0 }
+                .map { $0.0 }
+        }
+
+        return .failure(Error.noPassword)
     }
 }

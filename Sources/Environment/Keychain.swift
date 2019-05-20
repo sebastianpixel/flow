@@ -28,14 +28,6 @@ struct KeychainImpl: Keychain {
         }
     }
 
-    private func data(from string: String) -> Result<Data, Swift.Error> {
-        if let data = string.data(using: .utf8, allowLossyConversion: false) {
-            return .success(data)
-        } else {
-            return .failure(Error(message: "Could not transform \(string) to data."))
-        }
-    }
-
     func create(password: String, account: String) -> Result<Void, Swift.Error> {
         return data(from: password).flatMap { data in
             let query: NSDictionary = [
@@ -108,5 +100,14 @@ struct KeychainImpl: Keychain {
         }
 
         return .success(())
+    }
+
+    private func data(from string: String) -> Result<Data, Swift.Error> {
+        print(#function, string)
+        if let data = string.data(using: .utf8, allowLossyConversion: false) {
+            return .success(data)
+        } else {
+            return .failure(Error(message: "Could not transform \(string) to data."))
+        }
     }
 }
