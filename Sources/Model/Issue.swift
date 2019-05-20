@@ -40,6 +40,59 @@ public extension Issue {
         public let parent: Issue?
         public let issuetype: IssueType
         public let updated: Date?
+        public let description: String?
+        public let fixVersions: [FixVersion]
+        public let epicLink: String?
+
+        enum CodingKeys: String, CodingKey {
+            case summary, parent, issuetype, updated, description, fixVersions, customfield_10522
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            summary = try container.decode(String.self, forKey: .summary)
+            issuetype = try container.decode(IssueType.self, forKey: .issuetype)
+            if container.contains(.fixVersions) {
+                fixVersions = try container.decode([FixVersion].self, forKey: .fixVersions)
+            } else {
+                fixVersions = []
+            }
+            if container.contains(.parent) {
+                parent = try container.decode(Issue.self, forKey: .parent)
+            } else {
+                parent = nil
+            }
+            if container.contains(.updated) {
+                updated = try container.decode(Date.self, forKey: .updated)
+            } else {
+                updated = nil
+            }
+            if container.contains(.description) {
+                description = try container.decode(String.self, forKey: .description)
+            } else {
+                description = nil
+            }
+            if container.contains(.customfield_10522) {
+                epicLink = try container.decode(String.self, forKey: .customfield_10522)
+            } else {
+                epicLink = nil
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(summary, forKey: .summary)
+            try container.encode(parent, forKey: .parent)
+            try container.encode(issuetype, forKey: .issuetype)
+            try container.encode(updated, forKey: .updated)
+            try container.encode(description, forKey: .description)
+            try container.encode(fixVersions, forKey: .fixVersions)
+            try container.encode(epicLink, forKey: .customfield_10522)
+        }
+    }
+
+    struct FixVersion: Codable, Equatable {
+        public let name: String
     }
 
     struct IssueType: Codable, Equatable {

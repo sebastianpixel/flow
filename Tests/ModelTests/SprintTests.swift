@@ -13,5 +13,7 @@ class SprintTests: XCTestCase {
 
         XCTAssertFalse(sprint.closed)
         XCTAssertEqual(sprint.viewBoardsUrl, "https://jira.company.com/secure/GHGoToBoard.jspa?sprintId=1234")
+        XCTAssertEqual(sprint.id, 1234)
+        XCTAssertEqual(sprint.name, "Sprint name goes here")
     }
 }

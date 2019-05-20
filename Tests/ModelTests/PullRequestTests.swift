@@ -28,6 +28,6 @@ class PullRequestTests: XCTestCase {
         XCTAssertFalse(pullRequest.locked)
 
         XCTAssertNil(pullRequest.descriptionText)
-        XCTAssertEqual(pullRequest.description, "[OPEN] feature-PROJECT-1234-branch-name; Author: Tom Jones; Reviewers: Billy Joel (UNAPPROVED)")
+        XCTAssertEqual(pullRequest.description, "feature-PROJECT-1234-branch-name; Billy Joel 🛑")
     }
 }

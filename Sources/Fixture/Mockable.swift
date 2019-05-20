@@ -54,3 +54,7 @@ extension Sprint.Response: Mockable {
 extension Transition.Response: Mockable {
     public static let fixture = Fixture.transitions
 }
+
+extension Epic: Mockable {
+    public static let fixture = Fixture.epic
+}

@@ -3,7 +3,7 @@ import Model
 import Utils
 import XCTest
 
-class ReviewersTest: XCTestCase {
+class ReviewersTests: XCTestCase {
     func testMapping() {
         let response = Reviewer.Response.mock
 

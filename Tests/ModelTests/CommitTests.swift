@@ -3,7 +3,7 @@ import Model
 import Utils
 import XCTest
 
-class CommitTest: XCTestCase {
+class CommitTests: XCTestCase {
     func testMapping() {
         let response = Commit.Response.mock
 

@@ -48,7 +48,7 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
     }
 
     public var description: String {
-        return "[\(state)] \(title); Author: \(author.user.displayName); Reviewers: \(reviewers.map { "\($0.user.displayName) (\($0.status))" }.joined(separator: ", "))"
+        return "\(title); \(reviewers.map { "\($0.user.displayName) \($0.statusEmoji)" }.joined(separator: ", "))"
     }
 
     public struct Response: Codable {
@@ -59,6 +59,13 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
         public let approved: Bool
         public let status: String
         public let user: User
+
+        var statusEmoji: String {
+            switch status {
+            case "APPROVED": return "✅"
+            default: return "🛑"
+            }
+        }
     }
 
     public struct Branch: Codable, Equatable {

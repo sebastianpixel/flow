@@ -5,11 +5,9 @@ import XCTest
 
 class IssueTests: XCTestCase {
     func testMapping() {
-        let response = Issue.Response.mock
+        let response = Issue.mock
 
-        XCTAssertEqual(response.issues.count, 2)
-
-        let issue = response.issues.last!
+        let issue = response
 
         XCTAssertEqual(issue.id, 5678)
         XCTAssertEqual(issue.fields.parent?.id, 5677)
@@ -28,5 +26,10 @@ class IssueTests: XCTestCase {
 
         XCTAssertEqual(issue.branchName, "feature-PROJECT-1001-child-title-goes-here")
         XCTAssertEqual(issue.fields.parent?.branchName, "feature-PROJECT-1000-parent-title-goes-here")
+
+        XCTAssertEqual(issue.fields.parent?.fields.description, "Description goes here")
+        XCTAssertEqual(issue.fields.parent?.fields.fixVersions.count, 1)
+        XCTAssertEqual(issue.fields.parent?.fields.fixVersions.first?.name, "macOS")
+        XCTAssertEqual(issue.fields.parent?.fields.epicLink, "PROJECT-56")
     }
 }
