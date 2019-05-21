@@ -52,31 +52,11 @@ public extension Issue {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             summary = try container.decode(String.self, forKey: .summary)
             issuetype = try container.decode(IssueType.self, forKey: .issuetype)
-            if container.contains(.fixVersions) {
-                fixVersions = try container.decode([FixVersion].self, forKey: .fixVersions)
-            } else {
-                fixVersions = []
-            }
-            if container.contains(.parent) {
-                parent = try container.decode(Issue.self, forKey: .parent)
-            } else {
-                parent = nil
-            }
-            if container.contains(.updated) {
-                updated = try container.decode(Date.self, forKey: .updated)
-            } else {
-                updated = nil
-            }
-            if container.contains(.description) {
-                description = try container.decode(String.self, forKey: .description)
-            } else {
-                description = nil
-            }
-            if container.contains(.customfield_10522) {
-                epicLink = try container.decode(String.self, forKey: .customfield_10522)
-            } else {
-                epicLink = nil
-            }
+            fixVersions = try container.decodeIfPresent([FixVersion].self, forKey: .fixVersions) ?? []
+            parent = try container.decodeIfPresent(Issue.self, forKey: .parent)
+            updated = try container.decodeIfPresent(Date.self, forKey: .updated)
+            description = try container.decodeIfPresent(String.self, forKey: .description)
+            epicLink = try container.decodeIfPresent(String.self, forKey: .customfield_10522)
         }
 
         public func encode(to encoder: Encoder) throws {

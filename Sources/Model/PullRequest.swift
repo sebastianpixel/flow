@@ -63,7 +63,9 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
         var statusEmoji: String {
             switch status {
             case "APPROVED": return "✅"
-            default: return "🛑"
+            case "NEEDS_WORK": return "🚧"
+            case "UNAPPROVED": return "😶"
+            default: return "🤷‍♀️"
             }
         }
     }
