@@ -3,6 +3,7 @@ import Utils
 
 public protocol Shell {
     var editor: String { get }
+    var numColumns: Int { get }
 
     func prompt(_ str: String) -> String?
     func prompt(_ str: String, newline: Bool, silent: Bool) -> String?
@@ -135,6 +136,15 @@ struct ShellImpl: Shell {
             output
                 .flatMap { $0.isEmpty ? nil : $0 }
                 .map { Env.current.shell.write("\($0)".styled(.dim)) }
+        }
+    }
+
+    var numColumns: Int {
+        var winSize = winsize()
+        if ioctl(1, UInt(TIOCGWINSZ), &winSize) == -1 || winSize.ws_col == 0 {
+            return 80
+        } else {
+            return Int(winSize.ws_col)
         }
     }
 }

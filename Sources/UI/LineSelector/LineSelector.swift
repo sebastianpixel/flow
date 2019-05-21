@@ -16,10 +16,18 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
         var isSelected: Bool
         let item: DataSource.Item
 
-        init(text: String, isSelected: Bool = false, item: DataSource.Item) {
+        init(text: String, isSelected: Bool = false, item: DataSource.Item, numColumns: Int, promptCharCount: Int) {
             self.text = text
             self.isSelected = isSelected
-            self.item = item
+
+            if item.line.count > numColumns - promptCharCount {
+                var item = item
+                let line = item.line
+                item.line = String(line[line.startIndex ..< line.index(line.startIndex, offsetBy: numColumns - promptCharCount - 1)]) + "…"
+                self.item = item
+            } else {
+                self.item = item
+            }
         }
     }
 
@@ -49,7 +57,8 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
     private var isMultiselectEnabled = false
 
     public init?(dataSource: DataSource) {
-        allLines = dataSource.items.map { Line(text: $0.line, item: $0) }
+        let numColumns = Env.current.shell.numColumns
+        allLines = dataSource.items.map { Line(text: $0.line, item: $0, numColumns: numColumns, promptCharCount: Prompt.count) }
 
         lineDrawer = LineDrawer(linesToDrawCount: min(allLines.count, linesToDrawCount))
 

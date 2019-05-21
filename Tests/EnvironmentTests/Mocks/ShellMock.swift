@@ -1,6 +1,11 @@
 import Environment
 
 class ShellMock: Shell {
+    var numColumnsCallback = { 80 }
+    var numColumns: Int {
+        return numColumnsCallback()
+    }
+
     var editorCallback = { "vim" }
     var editor: String {
         return editorCallback()
