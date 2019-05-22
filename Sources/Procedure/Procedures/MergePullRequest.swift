@@ -28,7 +28,7 @@ public struct MergePullRequest: Procedure {
         )?
             .singleSelection()?
             .output,
-            PostMergePullRequest(stashProject: project, repository: repository, pullRequestId: "\(pullRequest.id)")
+            PostMergePullRequest(stashProject: project, repository: repository, pullRequestId: pullRequest.id, pullRequestVersion: pullRequest.version)
             .awaitResponseWithDebugPrinting() != nil else { return false }
 
         if Env.current.shell.promptDecision("Remove the remote branch?") {

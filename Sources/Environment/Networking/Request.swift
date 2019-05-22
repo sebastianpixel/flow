@@ -70,13 +70,13 @@ extension Request {
             fatalError("Could not generate base64EncodedString from login.")
         }
 
-        var headers = [
-            "Authorization": "Basic \(loginString)"
+        let headers = [
+            "Authorization": "Basic \(loginString)",
+            "Accept": "application/json",
+            "Content-Type": "application/json; charset=utf-8",
+            "X-Atlassian-Token": "no-check"
         ]
-        if httpBody != nil {
-            headers["Accept"] = "application/json"
-            headers["Content-Type"] = "application/json; charset=utf-8"
-        }
+
         return headers
     }
 }

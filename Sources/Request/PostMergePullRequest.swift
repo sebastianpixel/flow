@@ -5,12 +5,14 @@ import Model
 public struct PostMergePullRequest: Request {
     let stashProject: String
     let repository: String
-    let pullRequestId: String
+    let pullRequestId: Int
+    let pullRequestVersion: Int
 
-    public init(stashProject: String, repository: String, pullRequestId: String) {
+    public init(stashProject: String, repository: String, pullRequestId: Int, pullRequestVersion: Int) {
         self.stashProject = stashProject
         self.repository = repository
         self.pullRequestId = pullRequestId
+        self.pullRequestVersion = pullRequestVersion
     }
 
     public typealias Response = Empty
@@ -19,5 +21,7 @@ public struct PostMergePullRequest: Request {
     public let host = Env.current.git.host
     public var path: String { return "/rest/api/1.0/projects/\(stashProject)/repos/\(repository)/pull-requests/\(pullRequestId)/merge" }
     public var httpBody = Data?.none
-    public let queryItems = [URLQueryItem]()
+    public var queryItems: [URLQueryItem] {
+        return [URLQueryItem(name: "version", value: "\(pullRequestVersion)")]
+    }
 }

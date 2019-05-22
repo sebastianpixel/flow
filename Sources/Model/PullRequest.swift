@@ -10,9 +10,10 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
     public let open: Bool
     public let closed: Bool
     public let locked: Bool
+    public let version: Int
 
     enum CodingKeys: CodingKey {
-        case fromRef, toRef, links, title, reviewers, description, open, closed, locked, state, id, author
+        case fromRef, toRef, links, title, reviewers, description, open, closed, locked, state, id, author, version
     }
 
     public init(from decoder: Decoder) throws {
@@ -29,6 +30,7 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
         state = try container.decode(String.self, forKey: .state)
         id = try container.decode(Int.self, forKey: .id)
         author = try container.decode(Reviewer.self, forKey: .author)
+        version = try container.decode(Int.self, forKey: .version)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -45,6 +47,7 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
         try container.encode(state, forKey: .state)
         try container.encode(id, forKey: .id)
         try container.encode(author, forKey: .author)
+        try container.encode(version, forKey: .version)
     }
 
     public var description: String {

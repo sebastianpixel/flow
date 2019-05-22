@@ -18,6 +18,7 @@ class PullRequestTests: XCTestCase {
         XCTAssertEqual(pullRequest.toRef.displayId, "develop")
         XCTAssertEqual(pullRequest.links.linksSelf.count, 1)
         XCTAssertEqual(pullRequest.links.linksSelf.first?.href, "https://stash.company.com/projects/PROJECT/repos/repo-name/pull-requests/1060")
+        XCTAssertEqual(pullRequest.version, 1)
 
         XCTAssertEqual(pullRequest.reviewers.count, 1)
         XCTAssertEqual(pullRequest.reviewers.first?.approved, false)
