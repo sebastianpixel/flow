@@ -38,7 +38,7 @@ struct ShellImpl: Shell {
     }
 
     func promptDecision(_ str: String) -> Bool {
-        let answer = prompt(str + " [y/N]")
+        let answer = prompt(str + " [y/N]", newline: false, silent: false)
         return answer.map { ["y", "Y", ""].contains($0.trimmingCharacters(in: .whitespaces)) } == true
     }
 
