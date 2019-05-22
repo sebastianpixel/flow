@@ -209,7 +209,7 @@ class GitTests: XCTestCase {
         branch with spaces
         branchWithout
         """#
-        let branches = git.branches(containing: "\\s", options: .regularExpression)
+        let branches = git.branches(containing: "\\s", options: .regularExpression, excludeCurrent: true)
         XCTAssertEqual(branches, ["branch with spaces"])
     }
 

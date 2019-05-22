@@ -15,7 +15,7 @@ public protocol Git {
 
     func add(_ files: [String]) -> Bool
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String]
-    func branches(containing: String, options: String.CompareOptions) -> [String]
+    func branches(containing: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String]
     func checkout(_ branch: String) -> Bool
     func commit(message: String) -> Bool
     func createBranch(name: String) -> Bool
@@ -34,7 +34,7 @@ public protocol Git {
 
 public extension Git {
     func branches(containing pattern: String) -> [String] {
-        return branches(containing: pattern, options: [])
+        return branches(containing: pattern, options: [], excludeCurrent: true)
     }
 
     func branches(_ branchType: GitBranchType) -> [String] {
@@ -152,8 +152,8 @@ class GitImpl: Git {
         return Env.current.shell.run("git push origin :\(branch)")
     }
 
-    func branches(containing pattern: String, options: String.CompareOptions) -> [String] {
-        return branches(.all, excludeCurrent: false).filter { $0.range(of: pattern, options: options) != nil }
+    func branches(containing pattern: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String] {
+        return branches(.all, excludeCurrent: excludeCurrent).filter { $0.range(of: pattern, options: options) != nil }
     }
 
     var isRepo: Bool {

@@ -61,9 +61,9 @@ class GitMock: Git {
         return branchesWithExcludeCurrentCallback(branchType, excludeCurrent)
     }
 
-    var branchesContainingWithOptionsCallback: (String, String.CompareOptions) -> [String] = { _, _ in [] }
-    func branches(containing: String, options: String.CompareOptions) -> [String] {
-        return branchesContainingWithOptionsCallback(containing, options)
+    var branchesContainingWithOptionsAndExcludeCurrentCallback: (String, String.CompareOptions, Bool) -> [String] = { _, _, _ in [] }
+    func branches(containing: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String] {
+        return branchesContainingWithOptionsAndExcludeCurrentCallback(containing, options, excludeCurrent)
     }
 
     var checkoutCallback: (String) -> Bool = { _ in false }
