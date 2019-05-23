@@ -1,6 +1,5 @@
 import CommandLineKit
 import Environment
-import Procedure
 
 public final class Tool {
     let toolName: String
@@ -13,12 +12,34 @@ public final class Tool {
         toolName = name
         decorator(self)
 
-        if let parsingFailures = parsingFailures(arguments) {
-            let failures = parsingFailures
+        var arguments = groupArguments(arguments)
+
+        let (failures, commandWasRun) = parse(arguments)
+
+        if !failures.isEmpty {
+            let failures = failures
                 .map { "\($0.failure)\n\nUsage:\n\($0.command.usageDescription(ansi: true))" }
                 .joined(separator: "\n")
             Env.current.shell.write(failures)
         }
+
+        guard !commandWasRun else { return }
+
+        arguments = arguments.filter { $0.components(separatedBy: .whitespaces).count == 1 }.map { "\"\($0)\"" }
+
+        guard !arguments.isEmpty else { return }
+
+        Env.current.shell.write("No command found for: \(arguments.joined(separator: ", "))")
+        Env.current.shell.write("Did you mean one of those?")
+
+        commands.keys
+            .filter { cmd in
+                cmd != globalFlags && arguments.contains(where: { $0.dropFirst().first.map(String.init).map(cmd.hasPrefix) ?? false })
+            }
+            .sorted()
+            .forEach { cmd in
+                Env.current.shell.write("    \(cmd)")
+            }
     }
 
     public func usageDescription(ansi: Bool) -> String {
@@ -38,6 +59,7 @@ public final class Tool {
         let cmd = Command(toolName: toolName, name: name, aliases: aliases, description: description)
         decorator(cmd)
         for name in [name] + aliases {
+            guard commands[name] == nil else { fatalError("Command \(name) was already registered!") }
             commands[name] = cmd
         }
         // Add default help flag if there are options and there is no custom help flag.
@@ -57,11 +79,33 @@ public final class Tool {
         registerCommand(globalFlags, description: description, decorator: decorator)
     }
 
-    private func parsingFailures(_ arguments: [String]) -> [(failure: String, command: Command)]? {
+    private func groupArguments(_ arguments: [String]) -> [String] {
+        var activeQuotes = Character?.none
+
+        return arguments.enumerated().reduce(into: [String]()) { arguments, current in
+            let (index, argument) = current
+            if activeQuotes == nil,
+                let first = argument.first,
+                first == "\"" || first == "\'" {
+                activeQuotes = first
+                arguments.append(String(argument.dropFirst()))
+            } else if let quotes = activeQuotes {
+                arguments[index] += " \(argument)"
+                if argument.hasSuffix("\(quotes)") {
+                    activeQuotes = nil
+                }
+            } else {
+                arguments.append("\(argument)")
+            }
+        }
+    }
+
+    private func parse(_ arguments: [String]) -> (failures: [(failure: String, command: Command)], commandWasRun: Bool) {
         var savedArguments = [String]()
         var savedCommand = commands[globalFlags]
 
         var parsingFailures = [(failure: String, command: Command)]()
+        var commandWasRun = false
 
         let buildAndRunCommand = {
             if let oldCommand = savedCommand {
@@ -79,25 +123,16 @@ public final class Tool {
                 oldCommand.handler?()
 
                 savedArguments.removeAll()
+
+                if oldCommand.name == self.globalFlags, !flags.descriptors.contains(where: { $0.wasSet }) {
+                    return
+                }
+                commandWasRun = true
             }
         }
 
-        var activeQuotes = Character?.none
-
         for argument in arguments {
-            if activeQuotes == nil,
-                let first = argument.first,
-                first == "\"" || first == "\'" {
-                activeQuotes = first
-            }
-
-            if let quotes = activeQuotes,
-                argument.hasSuffix("\(quotes)") {
-                activeQuotes = nil
-            }
-
-            if activeQuotes == nil,
-                let newCommand = commands[argument] {
+            if let newCommand = commands[argument] {
                 buildAndRunCommand()
                 savedCommand = newCommand
             } else if savedCommand != nil {
@@ -106,6 +141,6 @@ public final class Tool {
         }
         buildAndRunCommand()
 
-        return parsingFailures.isEmpty ? nil : parsingFailures
+        return (parsingFailures, commandWasRun)
     }
 }
