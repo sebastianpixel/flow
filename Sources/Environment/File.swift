@@ -2,6 +2,7 @@ import Foundation
 
 public protocol File {
     var path: String { get }
+    var url: URL { get }
     var exists: Bool { get }
 
     static func tempPath() -> String
@@ -22,7 +23,7 @@ public protocol File {
 
 struct FileImpl: File {
     let path: String
-    private let url: URL
+    let url: URL
 
     init() {
         self.init(path: FileImpl.tempPath())

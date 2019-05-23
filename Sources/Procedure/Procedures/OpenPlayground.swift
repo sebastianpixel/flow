@@ -6,15 +6,15 @@ public struct OpenPlayground: Procedure {
 
     public func run() -> Bool {
         do {
-            let path = Env.current.directory.tempPath().removingIfNeeded(suffix: "/").appending(".playground/")
-            let dir = try Env.current.directory.init(path: path) {
-                try $0.file("Contents.swift") {
+            let path = Path.temp.value.removingIfNeeded(suffix: "/").appending(".playground/")
+            let dir = try Env.current.directory.init(path: .init(stringLiteral: path)) { directory in
+                try directory.file("Contents.swift") {
                     """
                     import UIKit
 
                     """
                 }
-                try $0.file("contents.xcplayground") {
+                try directory.file("contents.xcplayground") {
                     """
                     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                     <playground version='5.0' target-platform='ios' executeOnSourceChanges='false'>
@@ -22,7 +22,7 @@ public struct OpenPlayground: Procedure {
                     </playground>
                     """
                 }
-                try $0.file("timeline.xctimeline") {
+                try directory.file("timeline.xctimeline") {
                     """
                     <?xml version="1.0" encoding="UTF-8"?>
                     <Timeline
