@@ -21,7 +21,7 @@ struct ShellImpl: Shell {
     }
 
     func prompt(_ str: String) -> String? {
-        return prompt(str, newline: true, silent: false)
+        return prompt(str, newline: false, silent: false)
     }
 
     func prompt(_ str: String, newline: Bool, silent: Bool) -> String? {
