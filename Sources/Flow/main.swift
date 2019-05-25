@@ -2,16 +2,13 @@ import Foundation
 import Procedure
 import Tool
 
-private var arguments = CommandLine.arguments
-private let toolName = URL(fileURLWithPath: arguments.removeFirst()).lastPathComponent
-
-Tool(name: toolName, arguments: arguments) { flow in
+Tool { flow in
 
     var debug = false
-    let run = { Core(debug: debug, toolName: toolName).run($0) }
+    let run = { Core(debug: debug, toolName: flow.toolName).run($0) }
 
     defer {
-        if arguments.isEmpty {
+        if flow.arguments.isEmpty {
             run(PrintUsageDescription(usageDescription: flow.usageDescription(ansi: true), showInPager: true))
         }
     }

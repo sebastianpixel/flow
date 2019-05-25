@@ -1,15 +1,21 @@
 import CommandLineKit
 import Environment
+import Foundation
 
 public final class Tool {
-    let toolName: String
+    public let toolName: String
+    public let arguments: [String]
+
     private let globalFlags = "<global_flags>"
 
     private var commands = [String: Command]()
 
     @discardableResult
-    public init(name: String, arguments: [String], decorator: (Tool) -> Void) {
+    public init(name: String = URL(fileURLWithPath: CommandLine.arguments.first!).lastPathComponent,
+                arguments: [String] = Array(CommandLine.arguments.dropFirst()),
+                decorator: (Tool) -> Void) {
         toolName = name
+        self.arguments = arguments
         decorator(self)
 
         var arguments = groupArguments(arguments)
