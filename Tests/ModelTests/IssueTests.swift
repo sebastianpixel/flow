@@ -15,8 +15,8 @@ class IssueTests: XCTestCase {
         XCTAssertEqual(issue.key, "PROJECT-1001")
         XCTAssertEqual(issue.fields.parent?.key, "PROJECT-1000")
 
-        XCTAssertEqual(issue.fields.issuetype.name, .subTask)
-        XCTAssertEqual(issue.fields.parent?.fields.issuetype.name, .story)
+        XCTAssertEqual(issue.fields.issuetype.name, Issue.IssueType.Name.subTask.rawValue)
+        XCTAssertEqual(issue.fields.parent?.fields.issuetype.name, Issue.IssueType.Name.story.rawValue)
 
         XCTAssertEqual(issue.fields.summary, "Child title goes here")
         XCTAssertEqual(issue.fields.parent?.fields.summary, "Parent title goes here")

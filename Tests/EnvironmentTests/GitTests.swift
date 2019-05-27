@@ -126,6 +126,7 @@ class GitTests: XCTestCase {
     }
 
     func testBranches() {
+        booleanReturn = [true]
         shell.runReturningStringCallback = {
             self.commands.append($0)
             return """
@@ -153,6 +154,7 @@ class GitTests: XCTestCase {
     }
 
     func testBranchesExcludeCurrent() {
+        booleanReturn = [true, true]
         shell.runReturningStringCallback = {
             switch $0 {
             case "git rev-parse --abbrev-ref HEAD":
@@ -199,6 +201,7 @@ class GitTests: XCTestCase {
     }
 
     func testBranchesContainingPattern() {
+        booleanReturn = [true]
         var branchList = ""
         shell.runReturningStringCallback = {
             self.commands.append($0)
