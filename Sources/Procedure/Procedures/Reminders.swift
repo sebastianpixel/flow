@@ -78,11 +78,7 @@ public struct Reminders: Procedure {
 
         if !remindersToAdd.isEmpty {
             let comma = CharacterSet(charactersIn: ",")
-            let titles = remindersToAdd.reduce(into: [String]()) { accumulated, current in
-                let trimmed = current.trimmingCharacters(in: comma)
-                guard !trimmed.isEmpty else { return }
-                accumulated.append(trimmed)
-            }
+            let titles = remindersToAdd.joined(separator: " ").components(separatedBy: comma).map { $0.trimmingCharacters(in: .whitespaces) }
             guard add(titles: titles, store: store, calendar: calendar, lineDrawer: .init(linesToDrawCount: 0)) else {
                 return false
             }
