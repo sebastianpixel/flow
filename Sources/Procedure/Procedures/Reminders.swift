@@ -73,11 +73,8 @@ public struct Reminders: Procedure {
         guard success else { return false }
 
         guard let calendar = (Env.current.defaults[.calendarForReminders] as String?)
-            .flatMap(store.calendar(withIdentifier:)) ?? {
-                Env.current.shell.write("Please select a calendar (can be changed later):")
-                defer { LineDrawer(linesToDrawCount: 1).reset() }
-                return changeCalendar(store: store)
-            }() else { return false }
+            .flatMap(store.calendar(withIdentifier:))
+            ?? promptChange(store: store) else { return false }
 
         if !remindersToAdd.isEmpty {
             let comma = CharacterSet(charactersIn: ",")
@@ -249,6 +246,12 @@ public struct Reminders: Procedure {
             return "\(reminder.title ?? "")\(line.isEmpty ? "" : " (\(line.joined(separator: ", ")))")"
         }
         return reminder.title
+    }
+
+    func promptChange(store: EKEventStore) -> EKCalendar? {
+        Env.current.shell.write("Please select a calendar (can be changed later):")
+        defer { LineDrawer(linesToDrawCount: 1).reset() }
+        return changeCalendar(store: store)
     }
 
     private func changeCalendar(store: EKEventStore) -> EKCalendar? {
