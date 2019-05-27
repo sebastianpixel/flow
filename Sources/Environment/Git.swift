@@ -121,6 +121,9 @@ class GitImpl: Git {
     }
 
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String] {
+        if branchType == .all {
+            _ = fetch()
+        }
         let cmd = "git branch --sort=-committerdate \(branchType.flag)"
         let currentBranch = self.currentBranch
         guard let output = Env.current.shell.run(cmd) else { return [] }
