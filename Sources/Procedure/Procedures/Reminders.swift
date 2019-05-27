@@ -14,7 +14,7 @@ private extension EKReminder {
 
 public struct Reminders: Procedure {
     enum Action: String, CustomStringConvertible, CaseIterable {
-        case add, complete, edit, remove, quit
+        case add, complete, edit, remove, quit, defaultCalendar
 
         var shortcut: Character {
             return rawValue.first!
@@ -24,6 +24,7 @@ public struct Reminders: Procedure {
             let desc: String
             switch self {
             case .add: desc = "add new reminders"
+            case .defaultCalendar: desc = "change default calendar"
             case .edit: desc = "edit reminder"
             case .complete: desc = "mark reminders as completed"
             case .remove: desc = "remove reminders"
@@ -65,16 +66,18 @@ public struct Reminders: Procedure {
             }
         }).await()
 
-        if let error = error {
+        if let error = error, Env.current.debug {
             Env.current.shell.write("\(error)")
         }
 
         guard success else { return false }
 
-        guard let calendar = store.calendars(for: .reminder).first(where: { $0.title == "Reminders" }) else {
-            Env.current.shell.write("Calendar 'Reminders' not available.")
-            return false
-        }
+        guard let calendar = (Env.current.defaults[.calendarForReminders] as String?)
+            .flatMap(store.calendar(withIdentifier:)) ?? {
+                Env.current.shell.write("Please select a calendar (can be changed later):")
+                defer { LineDrawer(linesToDrawCount: 1).reset() }
+                return changeCalendar(store: store)
+            }() else { return false }
 
         if !remindersToAdd.isEmpty {
             let comma = CharacterSet(charactersIn: ",")
@@ -114,7 +117,8 @@ public struct Reminders: Procedure {
 
         let remindersDataSource = GenericLineSelectorDataSource(items: reminders, line: createLine)
 
-        let actions = GenericLineSelectorDataSource(items: Reminders.Action.allCases, line: \.description)
+        let actionItems = Reminders.Action.allCases.sorted { $0.rawValue < $1.rawValue }
+        let actions = GenericLineSelectorDataSource(items: actionItems, line: \.description)
         guard let (input, output) = LineSelector(dataSource: actions)?.singleSelection(),
             let action = Reminders.Action.allCases.first(where: { String($0.shortcut) == input }) ?? output else { return true }
 
@@ -127,6 +131,9 @@ public struct Reminders: Procedure {
                        store: store,
                        calendar: calendar,
                        lineDrawer: lineDrawer)
+        case .defaultCalendar:
+            return changeCalendar(store: store) != nil
+
         case .complete, .remove:
             return completeOrRemove(action: action,
                                     store: store,
@@ -242,5 +249,15 @@ public struct Reminders: Procedure {
             return "\(reminder.title ?? "")\(line.isEmpty ? "" : " (\(line.joined(separator: ", ")))")"
         }
         return reminder.title
+    }
+
+    private func changeCalendar(store: EKEventStore) -> EKCalendar? {
+        let calendars = store.calendars(for: .reminder)
+        let dataSource = GenericLineSelectorDataSource(items: calendars) { calendar in
+            "\(calendar.title), Source: \(calendar.source.title)"
+        }
+        let calendar = LineSelector(dataSource: dataSource)?.singleSelection()?.output
+        Env.current.defaults[.calendarForReminders] = calendar?.calendarIdentifier
+        return calendar
     }
 }

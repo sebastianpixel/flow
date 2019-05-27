@@ -36,7 +36,7 @@ struct DefaultsImpl: Defaults {
 }
 
 public enum DefaultsKey: String {
-    case username, lastCommitSubject, lastCommitBody
+    case username, lastCommitSubject, lastCommitBody, calendarForReminders
 }
 
 public protocol DefaultsValue {
