@@ -16,8 +16,6 @@ public struct RemoveRemoteBranches: Procedure {
 
         guard let selection = lineSelector?.multiSelection()?.output, !selection.isEmpty else { return true }
 
-        return selection.reduce(true) { result, branch in
-            result && Env.current.git.deleteRemote(branch: branch)
-        }
+        return selection.allSatisfy(Env.current.git.deleteRemote)
     }
 }

@@ -21,10 +21,10 @@ public extension String {
                 let nextIndex = index(after: i)
                 guard nextIndex < endIndex else { continue }
 
-                // search backwards in saved characters for last whitespace,
-                // add subrange from beginnging of characters up to there to
-                // lines, make subrange from there the new saved characters
-                // and continue from there.
+                // Search backwards in saved characters for last whitespace,
+                // add subrange from beginning of characters up to whitespace
+                // to lines, make subrange from whitespace the new saved
+                // characters and continue from there.
                 if let nextScalar = self[nextIndex].unicodeScalars.first,
                     !CharacterSet.whitespaces.contains(nextScalar) {
                     var previousCharacterIndex = characters.endIndex - 1
