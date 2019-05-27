@@ -40,47 +40,50 @@ public struct HandleFiles: Procedure {
         case .add:
             return Env.current.git.add(filePaths)
         case .remove:
-            var directoryPaths = Set<String>()
+            var directories = [URL: Set<URL>]()
+            var success = true
 
             for filePath in filePaths {
                 guard FileManager.default.fileExists(atPath: filePath) else {
                     Env.current.shell.write("No file or directory at path \(filePath).")
+                    success = false
                     continue
                 }
 
-                guard removeItem(at: filePath) else { continue }
+                let file = URL(fileURLWithPath: filePath)
+                let directory = file.deletingLastPathComponent()
 
-                let potentialEmptyDirectoryPath = URL(fileURLWithPath: filePath).deletingLastPathComponent().path
-                directoryPaths.insert(potentialEmptyDirectoryPath)
+                if directories[directory] == nil {
+                    directories[directory] = [file]
+                } else {
+                    directories[directory]?.insert(file)
+                }
             }
 
-            for directoryPath in directoryPaths {
-                var isDirectory = ObjCBool(false)
-                let exists = FileManager.default.fileExists(atPath: directoryPath, isDirectory: &isDirectory)
-                guard isDirectory.boolValue, exists else { continue }
-
-                let contents: [String]
+            for (directory, filesToRemove) in directories {
+                let contents: Set<URL>
                 do {
-                    contents = try FileManager.default.contentsOfDirectory(atPath: directoryPath)
+                    contents = Set(try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: []))
                 } catch {
                     Env.current.shell.write("\(error)")
+                    success = false
                     continue
                 }
-                guard contents.isEmpty, removeItem(at: directoryPath) else { continue }
+                success = success && contents == filesToRemove ? removeItem(at: directory) : filesToRemove.allSatisfy(removeItem)
             }
 
-            return true
+            return success
         }
     }
 
-    private func removeItem(at path: String) -> Bool {
+    private func removeItem(at url: URL) -> Bool {
         do {
-            try FileManager.default.removeItem(atPath: path)
+            try FileManager.default.removeItem(at: url)
         } catch {
             Env.current.shell.write("\(error)")
             return false
         }
-        Env.current.shell.write("Removed: \(path)")
+        Env.current.shell.write("Removed: \(url.path)")
         return true
     }
 }
