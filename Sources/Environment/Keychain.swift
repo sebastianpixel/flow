@@ -103,7 +103,6 @@ struct KeychainImpl: Keychain {
     }
 
     private func data(from string: String) -> Result<Data, Swift.Error> {
-        print(#function, string)
         if let data = string.data(using: .utf8, allowLossyConversion: false) {
             return .success(data)
         } else {
