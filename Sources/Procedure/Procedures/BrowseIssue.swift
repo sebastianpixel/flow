@@ -1,5 +1,6 @@
 import Environment
 import Foundation
+import Model
 import Request
 
 public struct BrowseIssue: Procedure {
@@ -18,7 +19,8 @@ public struct BrowseIssue: Procedure {
 
         if let expression = expression,
             let project = Env.current.jira.currentProject {
-            let issues = GetIssues(jiraProject: project, types: [.bug, .bugSub, .story, .subTask, .techStory], limit: 300).request().await()
+            let issueTypes: [Issue.IssueType.Name] = [.bug, .bugSub, .story, .subTask, .techStory]
+            let issues = GetIssues(jiraProject: project, types: issueTypes.map { $0.issueType }, limit: 300).request().await()
             switch issues {
             case let .success(success):
                 keyOfIssueToOpen = success.issues.first {

@@ -4,10 +4,10 @@ import Model
 
 public struct GetIssuesBySprint: Request {
     let sprint: Sprint
-    let types: [Issue.IssueType.Name]
+    let types: [Issue.IssueType]
     let limit: Int
 
-    public init(sprint: Sprint, types: [Issue.IssueType.Name], limit: Int) {
+    public init(sprint: Sprint, types: [Issue.IssueType], limit: Int) {
         self.sprint = sprint
         self.types = types
         self.limit = limit

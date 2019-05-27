@@ -84,7 +84,7 @@ public struct Initialize: Procedure {
     }
 
     private func selectFromAllIssues(JIRAproject: String) -> Result<Issue, Swift.Error> {
-        return GetIssues(jiraProject: JIRAproject, types: [.bug, .bugSub, .story, .subTask, .techStory], limit: 300)
+        return GetIssues(jiraProject: JIRAproject, types: [Issue.IssueType.Name.bug, .bugSub, .story, .subTask, .techStory].map { $0.issueType }, limit: 300)
             .request()
             .await()
             .flatMap { result in

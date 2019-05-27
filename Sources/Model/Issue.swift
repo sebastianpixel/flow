@@ -17,7 +17,7 @@ public final class Issue {
             .folding(options: [.diacriticInsensitive, .widthInsensitive, .caseInsensitive], locale: nil)
             .lowercased()
             .components(separatedBy: nonAlphaNumeric)
-        let components = [fields.issuetype.name.displayName, key] + fieldsStripped
+        let components = [fields.issuetype.displayName, key] + fieldsStripped
         return components.filter { !$0.isEmpty }.joined(separator: "-")
     }
 }
@@ -76,9 +76,17 @@ public extension Issue {
     }
 
     struct IssueType: Codable, Equatable {
-        public let name: Name
+        public let name: String
 
-        public enum Name: String, Codable, Equatable {
+        public var jqlSearchTerm: String {
+            return name.replacingOccurrences(of: " ", with: "+")
+        }
+
+        public var displayName: String {
+            return name.lowercased().contains("bug") ? "bugfix" : "feature"
+        }
+
+        public enum Name: String {
             case
                 story = "Story",
                 bug = "Bug",
@@ -88,16 +96,9 @@ public extension Issue {
                 bugSub = "Bug (sub)",
                 unplanned = "Unplanned"
 
-            public var displayName: String {
-                return Name.bugTypes.contains(self) ? "bugfix" : "feature"
+            public var issueType: IssueType {
+                return IssueType(name: rawValue)
             }
-
-            public var jqlSearchTerm: String {
-                return rawValue.replacingOccurrences(of: " ", with: "+")
-            }
-
-            static let featureTypes = [Name.story, .subTask, .techStory]
-            static let bugTypes = [Name.bug, .bugSub]
         }
     }
 }
