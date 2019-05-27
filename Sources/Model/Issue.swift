@@ -79,7 +79,7 @@ public extension Issue {
         public let name: String
 
         public var jqlSearchTerm: String {
-            return name.replacingOccurrences(of: " ", with: "+")
+            return #""\#(name.replacingOccurrences(of: " ", with: "+"))""#
         }
 
         public var displayName: String {
