@@ -74,7 +74,8 @@ extension Request {
             "Authorization": "Basic \(loginString)",
             "Accept": "application/json",
             "Content-Type": "application/json; charset=utf-8",
-            "X-Atlassian-Token": "no-check"
+            "X-Atlassian-Token": "no-check",
+            "accept-language": "en"
         ]
 
         return headers
