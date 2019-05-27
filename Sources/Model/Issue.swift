@@ -93,14 +93,7 @@ public extension Issue {
             }
 
             public var jqlSearchTerm: String {
-                switch self {
-                case .story, .bug, .subTask, .unplanned, .epic:
-                    return rawValue
-                case .bugSub:
-                    return #""Bug+(sub)""#
-                case .techStory:
-                    return #""Technische+Story""#
-                }
+                return rawValue.replacingOccurrences(of: " ", with: "+")
             }
 
             static let featureTypes = [Name.story, .subTask, .techStory]
