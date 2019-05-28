@@ -4,9 +4,10 @@ public protocol Directory {
     var path: Path { get }
 
     init(path: Path) throws
+    init(path: Path, create: Bool) throws
 
     @discardableResult
-    init(path: Path, write: (Directory) throws -> Void) throws
+    init(path: Path, create: Bool, write: (Directory) throws -> Void) throws
 
     func contents() throws -> [URL]
     func file(_ name: String) -> File
@@ -29,20 +30,26 @@ struct DirectoryImpl: Directory {
     }
 
     init(path: Path) throws {
-        try self.init(path: path, write: { _ in })
+        try self.init(path: path, create: true)
+    }
+
+    init(path: Path, create: Bool) throws {
+        try self.init(path: path, create: create, write: { _ in })
     }
 
     @discardableResult
-    init(path: Path, write: (Directory) throws -> Void) throws {
+    init(path: Path, create: Bool, write: (Directory) throws -> Void) throws {
         self.path = path
 
-        var isDirectory = ObjCBool(false)
-        let exists = FileManager.default.fileExists(atPath: path.url.absoluteString, isDirectory: &isDirectory)
+        if create {
+            var isDirectory = ObjCBool(false)
+            let exists = FileManager.default.fileExists(atPath: path.url.absoluteString, isDirectory: &isDirectory)
 
-        if exists, !isDirectory.boolValue {
-            throw Error.nonDirectoryFileAlreadyExistsAtPath(path.url.absoluteString)
-        } else if !exists {
-            try FileManager.default.createDirectory(at: path.url, withIntermediateDirectories: false, attributes: nil)
+            if exists, !isDirectory.boolValue {
+                throw Error.nonDirectoryFileAlreadyExistsAtPath(path.url.absoluteString)
+            } else if !exists {
+                try FileManager.default.createDirectory(at: path.url, withIntermediateDirectories: false, attributes: nil)
+            }
         }
 
         try write(self)

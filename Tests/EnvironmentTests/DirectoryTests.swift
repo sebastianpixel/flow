@@ -10,7 +10,7 @@ class DirectoryTests: XCTestCase {
     }
 
     func testCreateDirectoryInInit() throws {
-        let dir = try Env.current.directory.init(path: .temp(isDirectory: true), write: { _ in })
+        let dir = try Env.current.directory.init(path: .temp(isDirectory: true), create: true, write: { _ in })
 
         var isDirectory = ObjCBool(false)
         XCTAssertTrue(FileManager.default.fileExists(atPath: dir.path.url.path, isDirectory: &isDirectory))
@@ -22,7 +22,7 @@ class DirectoryTests: XCTestCase {
     func testCreateFileWhenInitializingDirectory() throws {
         var file: File!
 
-        let dir = try Env.current.directory.init(path: .temp(isDirectory: true)) {
+        let dir = try Env.current.directory.init(path: .temp(isDirectory: true), create: true) {
             file = try $0.file("test") {
                 "Test"
             }
@@ -34,7 +34,7 @@ class DirectoryTests: XCTestCase {
     }
 
     func testRemove() throws {
-        let dir = try Env.current.directory.init(path: .temp(isDirectory: true), write: { _ in })
+        let dir = try Env.current.directory.init(path: .temp(isDirectory: true), create: true, write: { _ in })
         XCTAssertTrue(FileManager.default.fileExists(atPath: dir.path.url.path))
         try dir.remove()
         XCTAssertFalse(FileManager.default.fileExists(atPath: dir.path.url.path))

@@ -59,6 +59,9 @@ shell commands with their output and errors.
   -h, --help
       Print the usage description.
 
+flow add, a
+Add untracked and unstaged files.
+
 flow assign-issue, assign <options>
 Assign an issue to a user.
 Options:
@@ -131,20 +134,6 @@ Options:
 
 flow generate-readme, readme
 Generate README.md.
-
-flow handle-files, hf <options>
-Either add or remove untracked or unstaged files.
-Options:
-  -a, --add
-      Select files to add.
-  -h, --help
-      Print the usage description of 'handle-files'.
-  -r, --remove
-      Select files to remove.
-  -S, --unstaged
-      Show unstaged files in selection.
-  -T, --untracked
-      Show untracked files in selection.
 
 flow help <options>
 Print the usage description.
@@ -231,6 +220,9 @@ Options:
       Show only reminders created with the current branch checked out.
   -h, --help
       Print the usage description of 'reminders'.
+
+flow remove, rm
+Remove untracked and unstaged files.
 
 flow remove-branch, rmb <options>
 Remove local (default) or remote branches.

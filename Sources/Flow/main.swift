@@ -316,19 +316,15 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("handle-files", "hf", description: "Either add or remove untracked or unstaged files.") { cmd in
+    flow.registerCommand("add", "a", description: "Add untracked and unstaged files.") {
+        $0.handler {
+            run(HandleFiles(.add, untracked: true, unstaged: true))
+        }
+    }
 
-        let remove = cmd.option(shortName: "r", longName: "remove", description: "Select files to remove.")
-        let add = cmd.option(shortName: "a", longName: "add", description: "Select files to add.")
-        let unstaged = cmd.option(shortName: "S", longName: "unstaged", description: "Show unstaged files in selection.")
-        let untracked = cmd.option(shortName: "T", longName: "untracked", description: "Show untracked files in selection.")
-
-        cmd.handler {
-            if remove.wasSet {
-                run(HandleFiles(.remove, untracked: untracked.wasSet, unstaged: unstaged.wasSet))
-            } else if add.wasSet {
-                run(HandleFiles(.add, untracked: untracked.wasSet, unstaged: unstaged.wasSet))
-            }
+    flow.registerCommand("remove", "rm", description: "Remove untracked and unstaged files.") {
+        $0.handler {
+            run(HandleFiles(.remove, untracked: true, unstaged: true))
         }
     }
 

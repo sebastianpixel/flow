@@ -63,7 +63,7 @@ public struct HandleFiles: Procedure {
             for (directory, filesToRemove) in directories {
                 let contents: Set<URL>
                 do {
-                    contents = Set(try Env.current.directory.init(path: .init(stringLiteral: directory.path)).contents())
+                    contents = Set(try Env.current.directory.init(path: .init(stringLiteral: directory.path), create: false).contents())
                 } catch {
                     Env.current.shell.write("\(error)")
                     success = false
