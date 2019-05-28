@@ -32,17 +32,15 @@ public struct AssignIssue: Procedure {
             let username = Env.current.login.username
             result = PutIssueAssignee(issueKey: issueKey, username: username).request().await()
         } else {
-            result = getCommitters(stashProject: stashProject, repo: repo).map { result in
-                result.flatMap { committers -> Result<User, Swift.Error> in
-                    guard
-                        !committers.isEmpty,
-                        let selector = LineSelector(dataSource: GenericLineSelectorDataSource(items: committers, line: \User.description)),
-                        let assignee = selector.singleSelection()?.output else { return .failure(Error.noAssignee) }
-                    return .success(assignee)
-                }
-                .flatMap { PutIssueAssignee(issueKey: issueKey, username: $0.name).request().await() }
+            let committers = getCommitters(stashProject: stashProject, repo: repo).await()
+            let assignee = committers.flatMap { committers -> Result<User, Swift.Error> in
+                guard
+                    !committers.isEmpty,
+                    let selector = LineSelector(dataSource: GenericLineSelectorDataSource(items: committers, line: \User.description)),
+                    let assignee = selector.singleSelection()?.output else { return .failure(Error.noAssignee) }
+                return .success(assignee)
             }
-            .await()
+            result = assignee.flatMap { PutIssueAssignee(issueKey: issueKey, username: $0.name).request().await() }
         }
 
         switch result {
