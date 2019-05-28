@@ -1,11 +1,14 @@
 import Foundation
 
 public protocol Directory {
-    var path: String { get }
+    var path: Path { get }
+
+    init(path: Path) throws
 
     @discardableResult
     init(path: Path, write: (Directory) throws -> Void) throws
 
+    func contents() throws -> [URL]
     func file(_ name: String) -> File
 
     @discardableResult
@@ -14,39 +17,32 @@ public protocol Directory {
     func remove() throws
 }
 
-public struct Path: ExpressibleByStringLiteral {
-    public let value: String
-
-    public init(stringLiteral value: String) {
-        self.value = value.appendingIfNeeded(suffix: "/")
-    }
-
-    public static let current = Path(stringLiteral: FileManager.default.currentDirectoryPath)
-    public static var temp: Path {
-        let randomName = ProcessInfo.processInfo.globallyUniqueString
-        let path = FileManager.default.temporaryDirectory.appendingPathComponent(randomName, isDirectory: true).path
-        return Path(stringLiteral: path)
-    }
-}
-
 struct DirectoryImpl: Directory {
     enum Error: Swift.Error {
         case nonDirectoryFileAlreadyExistsAtPath(String)
     }
 
-    let path: String
+    let path: Path
+
+    func contents() throws -> [URL] {
+        return try FileManager.default.contentsOfDirectory(at: path.url, includingPropertiesForKeys: nil, options: [])
+    }
+
+    init(path: Path) throws {
+        try self.init(path: path, write: { _ in })
+    }
 
     @discardableResult
     init(path: Path, write: (Directory) throws -> Void) throws {
-        self.path = path.value
+        self.path = path
 
         var isDirectory = ObjCBool(false)
-        let exists = FileManager.default.fileExists(atPath: self.path, isDirectory: &isDirectory)
+        let exists = FileManager.default.fileExists(atPath: path.url.absoluteString, isDirectory: &isDirectory)
 
         if exists, !isDirectory.boolValue {
-            throw Error.nonDirectoryFileAlreadyExistsAtPath(path.value)
+            throw Error.nonDirectoryFileAlreadyExistsAtPath(path.url.absoluteString)
         } else if !exists {
-            try FileManager.default.createDirectory(atPath: self.path, withIntermediateDirectories: false, attributes: nil)
+            try FileManager.default.createDirectory(at: path.url, withIntermediateDirectories: false, attributes: nil)
         }
 
         try write(self)
@@ -62,6 +58,6 @@ struct DirectoryImpl: Directory {
     }
 
     func remove() throws {
-        try FileManager.default.removeItem(atPath: path)
+        try FileManager.default.removeItem(at: path.url)
     }
 }

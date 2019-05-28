@@ -17,7 +17,7 @@ public struct GenerateReadme: Procedure {
         }
 
         do {
-            try Env.current.file.init(path: "\(rootDirectory)/README.md") {
+            try Env.current.file.init(path: .init(stringLiteral: "\(rootDirectory)/README.md")) {
                 #"""
                 # flow
 

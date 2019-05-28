@@ -1,20 +1,17 @@
 import Foundation
 
 public protocol File {
-    var path: String { get }
-    var url: URL { get }
+    var path: Path { get }
     var exists: Bool { get }
 
-    static func tempPath() -> String
-
     init()
-    init(path: String)
+    init(path: Path)
 
     @discardableResult
     init(write: () -> String) throws
 
     @discardableResult
-    init(path: String, write: () -> String) throws
+    init(path: Path, write: () -> String) throws
 
     func read() throws -> String
     func write(_ text: String) throws
@@ -22,47 +19,40 @@ public protocol File {
 }
 
 struct FileImpl: File {
-    let path: String
-    let url: URL
+    let path: Path
 
     init() {
-        self.init(path: FileImpl.tempPath())
+        self.init(path: .temp(isDirectory: false))
     }
 
-    init(path: String) {
+    init(path: Path) {
         self.path = path
-        url = URL(fileURLWithPath: path)
     }
 
     @discardableResult
     init(write: () -> String) throws {
-        try self.init(path: FileImpl.tempPath(), write: write)
+        try self.init(path: .temp(isDirectory: false), write: write)
     }
 
     @discardableResult
-    init(path: String, write: () -> String) throws {
+    init(path: Path, write: () -> String) throws {
         self.init(path: path)
         try self.write(write())
     }
 
-    static func tempPath() -> String {
-        let randomName = ProcessInfo.processInfo.globallyUniqueString
-        return FileManager.default.temporaryDirectory.appendingPathComponent(randomName, isDirectory: false).path
-    }
-
     var exists: Bool {
-        return FileManager.default.fileExists(atPath: path)
+        return FileManager.default.fileExists(atPath: path.url.path)
     }
 
     func read() throws -> String {
-        return try String(contentsOfFile: path, encoding: .utf8)
+        return try String(contentsOf: path.url, encoding: .utf8)
     }
 
     func write(_ text: String) throws {
-        try text.write(to: url, atomically: true, encoding: .utf8)
+        try text.write(to: path.url, atomically: true, encoding: .utf8)
     }
 
     func remove() throws {
-        try FileManager.default.removeItem(at: url)
+        try FileManager.default.removeItem(at: path.url)
     }
 }

@@ -6,8 +6,8 @@ public struct OpenPlayground: Procedure {
 
     public func run() -> Bool {
         do {
-            let path = Path.temp.value.removingIfNeeded(suffix: "/").appending(".playground/")
-            let dir = try Env.current.directory.init(path: .init(stringLiteral: path)) { directory in
+            let path = Path.temp(isDirectory: false).extending(with: ".playground/")
+            let dir = try Env.current.directory.init(path: path) { directory in
                 try directory.file("Contents.swift") {
                     """
                     import UIKit
@@ -33,7 +33,7 @@ public struct OpenPlayground: Procedure {
                     """
                 }
             }
-            return Env.current.workspace.openFile(dir.path)
+            return Env.current.workspace.open(dir.path.url)
         } catch {
             Env.current.shell.write("\(error)")
             return false

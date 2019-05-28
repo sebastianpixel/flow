@@ -2,15 +2,8 @@ import Environment
 import XCTest
 
 class FileTests: XCTestCase {
-    func testTempPath() {
-        let path = Env.current.file.tempPath()
-        XCTAssertTrue(path.hasPrefix(FileManager.default.temporaryDirectory.path))
-
-        XCTAssertFalse(FileManager.default.fileExists(atPath: path))
-    }
-
     func testExistsPositive() {
-        let path = FileManager.default.currentDirectoryPath
+        let path = Path(stringLiteral: FileManager.default.currentDirectoryPath)
         XCTAssertTrue(Env.current.file.init(path: path).exists)
     }
 
@@ -21,8 +14,8 @@ class FileTests: XCTestCase {
     func testWrite() throws {
         let file = Env.current.file.init()
         XCTAssertNoThrow(try file.write("Hello world!"))
-        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
-        let content = FileManager.default.contents(atPath: file.path).flatMap { String(data: $0, encoding: .utf8) }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path.url.path))
+        let content = FileManager.default.contents(atPath: file.path.url.path).flatMap { String(data: $0, encoding: .utf8) }
         XCTAssertEqual(content, "Hello world!")
         try file.remove()
     }

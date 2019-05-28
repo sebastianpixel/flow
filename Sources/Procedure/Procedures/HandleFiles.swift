@@ -44,7 +44,7 @@ public struct HandleFiles: Procedure {
             var success = true
 
             for filePath in filePaths {
-                guard FileManager.default.fileExists(atPath: filePath) else {
+                guard Env.current.file.init(path: .init(stringLiteral: filePath)).exists else {
                     Env.current.shell.write("No file or directory at path \(filePath).")
                     success = false
                     continue
@@ -63,7 +63,7 @@ public struct HandleFiles: Procedure {
             for (directory, filesToRemove) in directories {
                 let contents: Set<URL>
                 do {
-                    contents = Set(try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: []))
+                    contents = Set(try Env.current.directory.init(path: .init(stringLiteral: directory.path)).contents())
                 } catch {
                     Env.current.shell.write("\(error)")
                     success = false

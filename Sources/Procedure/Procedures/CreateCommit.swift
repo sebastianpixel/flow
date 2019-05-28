@@ -42,7 +42,7 @@ public struct CreateCommit: Procedure {
 
         if subjectIsEmpty,
             let root = Env.current.git.rootDirectory,
-            let commitFile = try? Env.current.file.init(path: "\(root)/.git/COMMIT_EDITMSG") { template(subject: subject, body: body) },
+            let commitFile = try? Env.current.file.init(path: .init(stringLiteral: "\(root)/.git/COMMIT_EDITMSG")) { template(subject: subject, body: body) },
             Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(commitFile.path)") {
                 let content = commitFile.parse(markEndLinePrefix: "# On branch")
 
