@@ -248,7 +248,7 @@ public struct Reminders: Procedure {
         return reminder.title
     }
 
-    func promptChange(store: EKEventStore) -> EKCalendar? {
+    private func promptChange(store: EKEventStore) -> EKCalendar? {
         Env.current.shell.write("Please select a calendar (can be changed later):")
         defer { LineDrawer(linesToDrawCount: 1).reset() }
         return changeCalendar(store: store)

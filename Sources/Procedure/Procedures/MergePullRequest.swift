@@ -32,12 +32,12 @@ public struct MergePullRequest: Procedure {
             .awaitResponseWithDebugPrinting() != nil else { return false }
 
         if Env.current.shell.promptDecision("Remove the remote branch?") {
-            _ = Env.current.git.deleteRemote(branch: pullRequest.fromRef.displayId)
+            guard Env.current.git.deleteRemote(branch: pullRequest.fromRef.displayId) else { return false }
         }
 
         if Env.current.shell.promptDecision("Remove the local branch?"),
             Env.current.git.checkout(pullRequest.toRef.displayId) {
-            _ = Env.current.git.deleteLocal(branch: pullRequest.fromRef.displayId, forced: true)
+            guard Env.current.git.deleteLocal(branch: pullRequest.fromRef.displayId, forced: true) else { return false }
         }
 
         if Env.current.shell.promptDecision("Update the JIRA issue?") {
