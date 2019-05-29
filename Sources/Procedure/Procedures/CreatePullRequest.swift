@@ -177,7 +177,7 @@ public final class CreatePullRequest: Procedure {
         }
         defer { try? tempFile.remove() }
 
-        guard Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(tempFile.path)") else {
+        guard Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(tempFile.path.url.path)") else {
             return .failure(Error.interactiveCommandFailed)
         }
 
