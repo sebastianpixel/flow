@@ -78,10 +78,6 @@ public extension Issue {
     struct IssueType: Codable, Equatable {
         public let name: String
 
-        public var jqlSearchTerm: String {
-            return #""\#(name.replacingOccurrences(of: " ", with: "+"))""#
-        }
-
         public var displayName: String {
             return name.lowercased().contains("bug") ? "bugfix" : "feature"
         }
@@ -95,6 +91,10 @@ public extension Issue {
                 techStory = "Technische Story",
                 bugSub = "Bug (sub)",
                 unplanned = "Unplanned"
+
+            public var jqlSearchTerm: String {
+                return #""\#(rawValue.replacingOccurrences(of: " ", with: "+"))""#
+            }
 
             public var issueType: IssueType {
                 return IssueType(name: rawValue)

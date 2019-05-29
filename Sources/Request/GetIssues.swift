@@ -4,12 +4,12 @@ import Model
 
 public struct GetIssues: Request {
     let jiraProject: String
-    let types: [Issue.IssueType]
+    let types: [Issue.IssueType.Name]
     let limit: Int
 
     public init(jiraProject: String, types: [Issue.IssueType.Name], limit: Int) {
         self.jiraProject = jiraProject
-        self.types = types.map { $0.issueType }
+        self.types = types
         self.limit = limit
     }
 
@@ -22,7 +22,7 @@ public struct GetIssues: Request {
     public var queryItems: [URLQueryItem] {
         let issueTypes = types.map { $0.jqlSearchTerm }.joined(separator: ",")
         return [
-            .init(name: "jql", value: #"project=\#(jiraProject)+AND+status+in+(Open,"Next","To Do")+AND+issuetype+in+(\#(issueTypes))+order+by+updatedDate"#),
+            .init(name: "jql", value: #"project=\#(jiraProject)+AND+issuetype+in+(\#(issueTypes))+order+by+updatedDate"#),
             .init(name: "fields", value: "key,summary,issuetype,parent,updated"),
             .init(name: "maxResults", value: "\(limit)")
         ]
