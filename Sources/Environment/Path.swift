@@ -26,3 +26,9 @@ public struct Path: ExpressibleByStringLiteral {
         return Path(stringLiteral: isDirectory ? path.appendingIfNeeded(suffix: "/") : path)
     }
 }
+
+extension String.StringInterpolation {
+    mutating func appendInterpolation(_ value: Path) {
+        appendLiteral(value.url.path)
+    }
+}
