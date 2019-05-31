@@ -39,7 +39,8 @@ public struct MergePullRequest: Procedure {
 
         if Env.current.shell.promptDecision("Remove the local branch?"),
             Env.current.git.checkout(pullRequest.toRef.displayId) {
-            guard Env.current.git.deleteLocal(branch: pullRequest.fromRef.displayId, forced: true) else { return false }
+            guard Env.current.git.deleteLocal(branch: pullRequest.fromRef.displayId, forced: true),
+                Env.current.git.pull() else { return false }
         }
 
         if Env.current.shell.promptDecision("Update the JIRA issue?") {
