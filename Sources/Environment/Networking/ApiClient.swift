@@ -6,7 +6,7 @@ public enum ApiClientError: Error {
     case
         noResponse,
         captchaChallenge,
-        status(Int),
+        status(Int, String?),
         noData,
         request(Swift.Error),
         decoding(Swift.Error)
@@ -41,7 +41,7 @@ public struct ApiClient {
                     }
 
                     guard 200 ..< 300 ~= urlResponse.statusCode else {
-                        throw ApiClientError.status(urlResponse.statusCode)
+                        throw ApiClientError.status(urlResponse.statusCode, data.flatMap { String(data: $0, encoding: .utf8) })
                     }
 
                     guard let data = data else {
