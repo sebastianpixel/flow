@@ -77,8 +77,10 @@ public struct Reminders: Procedure {
             ?? promptChange(store: store) else { return false }
 
         if !remindersToAdd.isEmpty {
-            let comma = CharacterSet(charactersIn: ",")
-            let titles = remindersToAdd.joined(separator: " ").components(separatedBy: comma).map { $0.trimmingCharacters(in: .whitespaces) }
+            let titles = remindersToAdd
+                .joined(separator: " ")
+                .split(separator: ";")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
             guard add(titles: titles, store: store, calendar: calendar, lineDrawer: .init(linesToDrawCount: 0)) else {
                 return false
             }
@@ -196,8 +198,8 @@ public struct Reminders: Procedure {
 
     private func promptTitlesToAdd() -> [String] {
         return (try? lineReader
-            .readLine(prompt: "Add new reminders (comma separated): ")
-            .split(separator: ",")
+            .readLine(prompt: "Add new reminders (semicolon separated): ")
+            .split(separator: ";")
             .map { $0.trimmingCharacters(in: .whitespaces) }) ?? []
     }
 

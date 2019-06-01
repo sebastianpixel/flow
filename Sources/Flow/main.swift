@@ -389,7 +389,7 @@ Tool { flow in
         let remindersToAdd = cmd.arguments(String.self,
                                            shortName: "A",
                                            longName: "add",
-                                           description: "Directly add new reminders (comma separated).")
+                                           description: "Directly add new reminders (semicolon separated).")
 
         cmd.handler {
             let scope: Reminders.Scope
