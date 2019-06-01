@@ -60,45 +60,46 @@ public struct ApiClient {
                     }
                 }
 
-                debugPrint("\(response)")
+                debugPrint { "\(response)" }
                 resolver(response)
             }.resume()
         }
     }
 
     private static func debugPrint(_ request: URLRequest) {
-        guard Env.current.debug else { return }
+        debugPrint {
+            var requestDump = ""
+            dump(request, to: &requestDump)
 
-        var requestDump = ""
-        dump(request, to: &requestDump)
+            return """
 
-        Env.current.shell.write("""
+            Request:
+            \(requestDump)
 
-        Request:
-        \(requestDump)
+            Header:
+            \(request.allHTTPHeaderFields as Any)
 
-        Header:
-        \(request.allHTTPHeaderFields as Any)
-
-        Body:
-        \(request.httpBody.flatMap { String(data: $0, encoding: .utf8) } as Any)
-        """)
+            Body:
+            \(request.httpBody.flatMap { String(data: $0, encoding: .utf8) } as Any)
+            """
+        }
     }
 
     private static func debugPrint(_ data: Data?, _ response: URLResponse?) {
-        debugPrint("""
+        debugPrint { """
 
         Response:
         \(response as Any)
 
         Data:
         \(data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: .allowFragments) } as Any)
-        """)
+        """
+        }
     }
 
-    private static func debugPrint(_ message: String) {
+    private static func debugPrint(_ message: () -> String) {
         guard Env.current.debug else { return }
 
-        Env.current.shell.write(message)
+        Env.current.shell.write(message())
     }
 }
