@@ -3,7 +3,6 @@ import Foundation
 public protocol Directory {
     var path: Path { get }
 
-    init(path: Path) throws
     init(path: Path, create: Bool) throws
 
     @discardableResult
@@ -27,10 +26,6 @@ struct DirectoryImpl: Directory {
 
     func contents() throws -> [URL] {
         return try FileManager.default.contentsOfDirectory(at: path.url, includingPropertiesForKeys: nil, options: [])
-    }
-
-    init(path: Path) throws {
-        try self.init(path: path, create: true)
     }
 
     init(path: Path, create: Bool) throws {
