@@ -28,7 +28,7 @@ public struct Path: ExpressibleByStringLiteral {
 }
 
 extension String.StringInterpolation {
-    mutating func appendInterpolation(_ value: Path) {
+    public mutating func appendInterpolation(_ value: Path) {
         appendLiteral(value.url.path)
     }
 }
