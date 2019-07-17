@@ -20,14 +20,16 @@ public final class CreatePullRequest: Procedure {
     private let defaultReviewers: Bool
     private let parentBranch: Bool
     private let noEdit: Bool
+    private let browseAfterSuccessfulCreation: Bool
 
     private var currentIssueKey = Env.current.jira.currentIssueKey(promptOnError: false)
     private lazy var currentIssue = { currentIssueKey.map(GetIssue.init)?.awaitResponseWithDebugPrinting() }()
 
-    public init(defaultReviewers: Bool, parentBranch: Bool, noEdit: Bool) {
+    public init(defaultReviewers: Bool, parentBranch: Bool, noEdit: Bool, browseAfterSuccessfulCreation: Bool) {
         self.defaultReviewers = defaultReviewers
         self.parentBranch = parentBranch
         self.noEdit = noEdit
+        self.browseAfterSuccessfulCreation = browseAfterSuccessfulCreation
     }
 
     public func run() -> Bool {
@@ -88,7 +90,11 @@ public final class CreatePullRequest: Procedure {
 
         switch result {
         case .success:
-            return true
+            if browseAfterSuccessfulCreation {
+                return BrowseGit(currentDirectory: false, pullRequest: true, branchToOpen: .current).run()
+            } else {
+                return true
+            }
         case let .failure(failure):
             if Env.current.debug {
                 Env.current.shell.write("\(failure)")

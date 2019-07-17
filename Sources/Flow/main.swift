@@ -252,13 +252,18 @@ Tool { flow in
                                longName: "merge",
                                description: "Select pull-request from the current repository to merge.")
 
+        let browseAfterSuccessfulCreation = cmd.option(shortName: "b",
+                                                       longName: "browse",
+                                                       description: "Show PR if created successfully.")
+
         cmd.handler {
             if merge.wasSet {
                 run(MergePullRequest())
             } else {
                 run(CreatePullRequest(defaultReviewers: defaultReviewers.wasSet,
                                       parentBranch: parentBranch.wasSet,
-                                      noEdit: noEdit.wasSet))
+                                      noEdit: noEdit.wasSet,
+                                      browseAfterSuccessfulCreation: browseAfterSuccessfulCreation.wasSet))
             }
         }
     }
