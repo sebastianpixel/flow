@@ -23,7 +23,7 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
         links = try container.decode(Links.self, forKey: .links)
         title = try container.decode(String.self, forKey: .title)
         reviewers = try container.decode([Reviewer].self, forKey: .reviewers)
-        descriptionText = try? container.decode(String.self, forKey: .description)
+        descriptionText = try container.decodeIfPresent(String.self, forKey: .description)
         open = try container.decode(Bool.self, forKey: .open)
         closed = try container.decode(Bool.self, forKey: .closed)
         locked = try container.decode(Bool.self, forKey: .locked)
@@ -51,7 +51,7 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
     }
 
     public var description: String {
-        return "\(title); \(reviewers.map { "\($0.user.displayName) \($0.statusEmoji)" }.joined(separator: ", "))"
+        return "\(title); \(reviewers.map { "\($0.user.displayName.map { "\($0) " } ?? "")\($0.statusEmoji)" }.joined(separator: ", "))"
     }
 
     public struct Response: Codable {

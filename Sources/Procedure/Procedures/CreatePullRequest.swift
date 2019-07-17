@@ -111,7 +111,7 @@ public final class CreatePullRequest: Procedure {
                 .map { result -> Result<[String], Swift.Error> in
                     result.flatMap {
                         let username = Env.current.login.username
-                        let names = $0.first?.reviewers.filter { $0.active && $0.name != username }.map { $0.name }
+                        let names = $0.first?.reviewers.filter { $0.active == true && $0.name != username }.map { $0.name }
                         if let reviewers = names {
                             return .success(reviewers)
                         } else {

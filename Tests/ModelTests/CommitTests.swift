@@ -11,7 +11,7 @@ class CommitTests: XCTestCase {
 
         let committer = response.values.first!.committer
 
-        XCTAssertTrue(committer.active)
+        XCTAssertTrue(committer.active!)
         XCTAssertEqual(committer.displayName, "Tom Jones")
         XCTAssertEqual(committer.name, "tjones")
 

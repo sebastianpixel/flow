@@ -18,7 +18,7 @@ class ReviewersTests: XCTestCase {
 
         let reviewer = responseElement.reviewers.first!
 
-        XCTAssertTrue(reviewer.active)
+        XCTAssertTrue(reviewer.active!)
         XCTAssertEqual(reviewer.displayName, "Tom Jones")
         XCTAssertEqual(reviewer.name, "tjones")
     }

@@ -44,7 +44,7 @@ extension Procedure {
                     var set = Set<User>()
                     return response.values
                         .reduce(into: [User]()) { users, commit in
-                            guard commit.committer.active, set.insert(commit.committer).inserted else { return }
+                            guard commit.committer.active == true, set.insert(commit.committer).inserted else { return }
                             users.append(commit.committer)
                         }
                         .sorted { $0.name > $1.name }
