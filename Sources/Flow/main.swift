@@ -256,6 +256,10 @@ Tool { flow in
                                                        longName: "browse",
                                                        description: "Show PR if created successfully.")
 
+        let copyPRDescriptionToClipboard = cmd.option(shortName: "c",
+                                                      longName: "copy",
+                                                      description: "Copy description of PR with link to clipboard e.g. to paste it into Slack.")
+
         cmd.handler {
             if merge.wasSet {
                 run(MergePullRequest())
@@ -263,7 +267,8 @@ Tool { flow in
                 run(CreatePullRequest(defaultReviewers: defaultReviewers.wasSet,
                                       parentBranch: parentBranch.wasSet,
                                       noEdit: noEdit.wasSet,
-                                      browseAfterSuccessfulCreation: browseAfterSuccessfulCreation.wasSet))
+                                      browseAfterSuccessfulCreation: browseAfterSuccessfulCreation.wasSet,
+                                      copyPRDescriptionToClipboard: copyPRDescriptionToClipboard.wasSet))
             }
         }
     }

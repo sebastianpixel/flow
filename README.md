@@ -198,6 +198,8 @@ Alternatively to creating -m | --merge merges existing PRs.
 Options:
   -b, --browse
       Show PR if created successfully.
+  -c, --copy
+      Copy description of PR with link to clipboard e.g. to paste it into Slack.
   -d, --default
       Fetch the default reviewers of the repository and set them as
       reviewers of the pull request if there are some.

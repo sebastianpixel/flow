@@ -34,12 +34,7 @@ public struct BrowseGit: Procedure {
         }() ?? Env.current.jira.currentIssueKey().flatMap({ Env.current.git.branch(containing: $0, excludeCurrent: false) }) else { return false }
 
         if pullRequest,
-            let stashProject = Env.current.git.projectOrUser,
-            let repository = Env.current.git.currentRepo,
-            let pullRequests = GetPullRequests(stashProject: stashProject, repository: repository).awaitResponseWithDebugPrinting(),
-            let pullRequestOfCurrentBranch = pullRequests.values.first(where: { $0.fromRef.displayId == branch }),
-            let href = pullRequestOfCurrentBranch.links.linksSelf.first?.href,
-            let url = URL(string: href) {
+            let url = getUrlOfPullRequest(branch: branch) {
             return Env.current.workspace.open(url)
         }
 

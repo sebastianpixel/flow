@@ -21,15 +21,21 @@ public final class CreatePullRequest: Procedure {
     private let parentBranch: Bool
     private let noEdit: Bool
     private let browseAfterSuccessfulCreation: Bool
+    private let copyPRDescriptionToClipboard: Bool
 
     private var currentIssueKey = Env.current.jira.currentIssueKey(promptOnError: false)
     private lazy var currentIssue = { currentIssueKey.map(GetIssue.init)?.awaitResponseWithDebugPrinting() }()
 
-    public init(defaultReviewers: Bool, parentBranch: Bool, noEdit: Bool, browseAfterSuccessfulCreation: Bool) {
+    public init(defaultReviewers: Bool,
+                parentBranch: Bool,
+                noEdit: Bool,
+                browseAfterSuccessfulCreation: Bool,
+                copyPRDescriptionToClipboard: Bool) {
         self.defaultReviewers = defaultReviewers
         self.parentBranch = parentBranch
         self.noEdit = noEdit
         self.browseAfterSuccessfulCreation = browseAfterSuccessfulCreation
+        self.copyPRDescriptionToClipboard = copyPRDescriptionToClipboard
     }
 
     public func run() -> Bool {
@@ -64,7 +70,7 @@ public final class CreatePullRequest: Procedure {
                         return .failure(failure)
                     }
                 }
-                return PostPullRequest(stashProject: stashProject,
+                let result = PostPullRequest(stashProject: stashProject,
                                        repository: repo,
                                        title: title,
                                        source: currentBranch,
@@ -72,6 +78,12 @@ public final class CreatePullRequest: Procedure {
                                        reviewers: reviewers,
                                        description: description,
                                        closeSourceBranch: true).request().await()
+                if copyPRDescriptionToClipboard,
+                    result.isSuccess,
+                    let url = getUrlOfPullRequest(branch: currentBranch)?.absoluteString {
+                    Env.current.clipboard.string = "PR \(title): \(url)"
+                }
+                return result
             }
             .flatMap { _ -> Result<(issueKey: String, response: GetIssueTransitions.Response), Swift.Error> in
                 // No key in branch name nor key provided -> don't try to set new status

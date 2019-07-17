@@ -1,4 +1,5 @@
 import Environment
+import Foundation
 import Model
 import Request
 import UI
@@ -50,5 +51,17 @@ extension Procedure {
                         .sorted { $0.name > $1.name }
                 }
             }
+    }
+
+    func getUrlOfPullRequest(branch: String) -> URL? {
+        if let stashProject = Env.current.git.projectOrUser,
+            let repository = Env.current.git.currentRepo,
+            let pullRequests = GetPullRequests(stashProject: stashProject, repository: repository).awaitResponseWithDebugPrinting(),
+            let pullRequestOfCurrentBranch = pullRequests.values.first(where: { $0.fromRef.displayId == branch }),
+            let href = pullRequestOfCurrentBranch.links.linksSelf.first?.href,
+            let url = URL(string: href) {
+            return url
+        }
+        return nil
     }
 }

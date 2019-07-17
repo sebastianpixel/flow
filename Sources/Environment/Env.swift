@@ -15,4 +15,5 @@ public struct Env {
     public var file: File.Type = FileImpl.self
     public var urlSession: URLSessionProtocol = URLSession.shared
     public var workspace: Workspace = WorkspaceImpl()
+    public var clipboard: Clipboard = ClipboardImpl()
 }
