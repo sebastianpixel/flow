@@ -102,8 +102,9 @@ public final class CreatePullRequest: Procedure {
 
         switch result {
         case .success:
-            if browseAfterSuccessfulCreation {
-                return BrowseGit(currentDirectory: false, pullRequest: true, branchToOpen: .current).run()
+            if browseAfterSuccessfulCreation,
+                let url = getUrlOfPullRequest(branch: currentBranch) {
+                return Env.current.workspace.open(url)
             } else {
                 return true
             }
