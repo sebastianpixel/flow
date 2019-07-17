@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "43304bf2b1579fd555f2fdd51742771c1e4f2b98",
-          "version": "8.0.1"
+          "revision": "f8657642dfdec9973efc79cc68bcef43a653a2bc",
+          "version": "8.0.2"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/nicklockwood/SwiftFormat",
         "state": {
           "branch": null,
-          "revision": "8b3e855384f15847915fa3a02019185ee7515107",
-          "version": "0.40.8"
+          "revision": "0708f1eefe0a2ce2aa42fc3ff86125cdb751e63c",
+          "version": "0.40.10"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/Realm/SwiftLint",
         "state": {
           "branch": null,
-          "revision": "6534946fe3f765bd31fc28b8aeb6c369de0b6791",
-          "version": "0.32.0"
+          "revision": "ffd08047464c78511ba3e8d0de4b2edd2ffa93b0",
+          "version": "0.33.1"
         }
       },
       {
