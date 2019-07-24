@@ -21,10 +21,7 @@ Tool { flow in
 
         let debugOption = cmd.option(shortName: "d",
                                      longName: "debug",
-                                     description: """
-                                     Print networking requests, responses, received JSON,
-                                     shell commands with their output and errors.
-                                     """)
+                                     description: "Print networking requests, responses, shell commands with their output and errors.")
 
         cmd.handler {
             debug = debugOption.wasSet
@@ -149,6 +146,7 @@ Tool { flow in
     * set to track a branch in the remote repository.
     * Optionally the selected issue will be assigned to the current user
     * and its status will be updated to "In Progress".
+    If the issue is not part of the current sprint you will be asked if it should be moved there.
     """) { cmd in
 
         let project = cmd.argument(String.self,
@@ -258,7 +256,7 @@ Tool { flow in
 
         let copyPRDescriptionToClipboard = cmd.option(shortName: "c",
                                                       longName: "copy",
-                                                      description: "Copy description of PR with link to clipboard e.g. to paste it into Slack.")
+                                                      description: "Copy a description of the PR with link to the clipboard e.g. to paste it into Slack.")
 
         cmd.handler {
             if merge.wasSet {

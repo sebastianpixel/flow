@@ -54,8 +54,7 @@ flow <global_flags> <options>
 Flags that are not preceded by a command.
 Options:
   -d, --debug
-      Print networking requests, responses, received JSON,
-shell commands with their output and errors.
+      Print networking requests, responses, shell commands with their output and errors.
   -h, --help
       Print the usage description.
 
@@ -156,6 +155,7 @@ With the provided issue key or the selected line
 * set to track a branch in the remote repository.
 * Optionally the selected issue will be assigned to the current user
 * and its status will be updated to "In Progress".
+If the issue is not part of the current sprint you will be asked if it should be moved there.
 Options:
   -h, --help
       Print the usage description of 'init'.
@@ -199,7 +199,7 @@ Options:
   -b, --browse
       Show PR if created successfully.
   -c, --copy
-      Copy description of PR with link to clipboard e.g. to paste it into Slack.
+      Copy a description of the PR with link to the clipboard e.g. to paste it into Slack.
   -d, --default
       Fetch the default reviewers of the repository and set them as
       reviewers of the pull request if there are some.
