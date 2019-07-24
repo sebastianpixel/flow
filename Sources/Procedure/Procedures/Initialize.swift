@@ -71,6 +71,14 @@ public struct Initialize: Procedure {
 
         switch result {
         case .success:
+            if let project = getJiraProject(from: jiraProject),
+                let currentSprint = GetCurrentSprint(jiraProject: project).awaitResponseWithDebugPrinting()?.sprints.first,
+                let issue = try? issueResult.get(),
+                let issues = GetIssuesBySprint(sprint: currentSprint, types: [.bug, .bugSub, .story, .subTask, .techStory, .unplanned], limit: 1000).awaitResponseWithDebugPrinting(),
+                !issues.issues.contains(issue),
+                Env.current.shell.promptDecision("The issue is currenlty not part of the active sprint. Do you want to move it (will affect the sprint's total estimation)?") {
+                return PostMoveIssuesToSprint(sprint: currentSprint, issues: [issue]).awaitResponseWithDebugPrinting() != nil
+            }
             return true
         case let .failure(failure):
             if Env.current.debug {
