@@ -23,7 +23,7 @@ public struct GetIssuesBySprint: Request {
         let issueTypes = types.map { $0.jqlSearchTerm }.joined(separator: ",")
         return [
             .init(name: "jql", value: #"Sprint=\#(sprint.id)+AND+issuetype+in+(\#(issueTypes))"#),
-            .init(name: "fields", value: "key,summary,issuetype,parent,updated,description,fixVersions,customfield_10522"),
+            .init(name: "fields", value: "key,summary,issuetype,parent,updated,description,fixVersions,customfield_10522,customfield_10223"),
             .init(name: "maxResults", value: "\(limit)")
         ]
     }

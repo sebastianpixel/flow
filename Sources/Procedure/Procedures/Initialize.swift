@@ -34,8 +34,7 @@ public struct Initialize: Procedure {
 
         let result = issueResult
             .map { issue -> String in
-                if !Env.current.debug,
-                    Env.current.git.createBranch(name: issue.branchName) {
+                if Env.current.git.createBranch(name: issue.branchName) {
                     _ = Env.current.git.pushSetUpstream()
                 }
                 return issue.key
@@ -76,7 +75,9 @@ public struct Initialize: Procedure {
                 let issue = try? issueResult.get(),
                 let issues = GetIssuesBySprint(sprint: currentSprint, types: [.bug, .bugSub, .story, .subTask, .techStory, .unplanned], limit: 1000).awaitResponseWithDebugPrinting(),
                 !issues.issues.contains(issue),
-                Env.current.shell.promptDecision("The issue is currenlty not part of the active sprint \"\(currentSprint.name)\". Do you want to move it (will affect the sprint's total estimation)?") {
+                Env.current.shell.promptDecision(
+                    "The issue is currenlty not part of the active sprint \"\(currentSprint.name)\". Do you want to move it (will \(issue.fields.storyPoints ?? 0 == 0 ? "not " : "")affect the sprint's total estimation)?"
+                ) {
                 return PostMoveIssuesToSprint(sprint: currentSprint, issues: [issue]).awaitResponseWithDebugPrinting() != nil
             }
             return true

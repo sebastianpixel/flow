@@ -23,7 +23,7 @@ public struct GetIssues: Request {
         let issueTypes = types.map { $0.jqlSearchTerm }.joined(separator: ",")
         return [
             .init(name: "jql", value: #"project=\#(jiraProject)+AND+issuetype+in+(\#(issueTypes))+order+by+updatedDate"#),
-            .init(name: "fields", value: "key,summary,issuetype,parent,updated"),
+            .init(name: "fields", value: "key,summary,issuetype,parent,updated,customfield_10223"),
             .init(name: "maxResults", value: "\(limit)")
         ]
     }

@@ -43,9 +43,10 @@ public extension Issue {
         public let description: String?
         public let fixVersions: [FixVersion]
         public let epicLink: String?
+        public let storyPoints: Double?
 
         enum CodingKeys: String, CodingKey {
-            case summary, parent, issuetype, updated, description, fixVersions, customfield_10522
+            case summary, parent, issuetype, updated, description, fixVersions, customfield_10522, customfield_10223
         }
 
         public init(from decoder: Decoder) throws {
@@ -57,6 +58,7 @@ public extension Issue {
             updated = try container.decodeIfPresent(Date.self, forKey: .updated)
             description = try container.decodeIfPresent(String.self, forKey: .description)
             epicLink = try container.decodeIfPresent(String.self, forKey: .customfield_10522)
+            storyPoints = try container.decodeIfPresent(Double.self, forKey: .customfield_10223)
         }
 
         public func encode(to encoder: Encoder) throws {
@@ -68,6 +70,7 @@ public extension Issue {
             try container.encode(description, forKey: .description)
             try container.encode(fixVersions, forKey: .fixVersions)
             try container.encode(epicLink, forKey: .customfield_10522)
+            try container.encode(storyPoints, forKey: .customfield_10223)
         }
     }
 
