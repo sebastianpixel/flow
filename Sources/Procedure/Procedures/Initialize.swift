@@ -76,7 +76,7 @@ public struct Initialize: Procedure {
                 let issue = try? issueResult.get(),
                 let issues = GetIssuesBySprint(sprint: currentSprint, types: [.bug, .bugSub, .story, .subTask, .techStory, .unplanned], limit: 1000).awaitResponseWithDebugPrinting(),
                 !issues.issues.contains(issue),
-                Env.current.shell.promptDecision("The issue is currenlty not part of the active sprint. Do you want to move it (will affect the sprint's total estimation)?") {
+                Env.current.shell.promptDecision("The issue is currenlty not part of the active sprint \"\(currentSprint.name)\". Do you want to move it (will affect the sprint's total estimation)?") {
                 return PostMoveIssuesToSprint(sprint: currentSprint, issues: [issue]).awaitResponseWithDebugPrinting() != nil
             }
             return true
