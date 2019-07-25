@@ -81,7 +81,7 @@ public final class CreatePullRequest: Procedure {
                 if copyPRDescriptionToClipboard,
                     result.isSuccess,
                     let url = getUrlOfPullRequest(branch: currentBranch)?.absoluteString {
-                    Env.current.clipboard.string = "PR \(title): \(url)"
+                    Env.current.clipboard.string = "PR \"\(currentIssue?.fields.summary ?? title)\": \(url)"
                 }
                 return result
             }
