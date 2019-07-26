@@ -23,7 +23,7 @@ public struct CreateCommit: Procedure {
 
         var body = ""
         var subject = self.message ?? ""
-        let subjectIsEmpty = subject.isEmpty
+        let noMessageWasProvided = subject.isEmpty
 
         if prependWithIssueKey,
             let key = Env.current.jira.currentIssueKey() {
@@ -34,13 +34,14 @@ public struct CreateCommit: Procedure {
         // In this case the template is pupulated with the previous values to avoid having to
         // retype the message.
 
-        if let lastCommitSubject = Env.current.defaults[.lastCommitSubject] as String?,
+        if noMessageWasProvided,
+            let lastCommitSubject = Env.current.defaults[.lastCommitSubject] as String?,
             let lastCommitBody = Env.current.defaults[.lastCommitBody] as String? {
             subject = lastCommitSubject
             body = lastCommitBody.isEmpty ? "" : "\(lastCommitBody)\n"
         }
 
-        if subjectIsEmpty,
+        if noMessageWasProvided,
             let root = Env.current.git.rootDirectory,
             let commitFile = try? Env.current.file.init(path: .init(stringLiteral: "\(root)/.git/COMMIT_EDITMSG")) { template(subject: subject, body: body) },
             Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(commitFile.path)") {
@@ -79,7 +80,7 @@ public struct CreateCommit: Procedure {
 
     private func template(subject: String, body: String) -> String {
         return """
-        \(subject)
+        \(subject)\((subject + body).isEmpty ? "" : "\n")
         \(body)
         \(Env.current.git.status(verbose: false)?.components(separatedBy: .newlines).map { "# \($0)" }.joined(separator: "\n") ?? "")
 
