@@ -7,14 +7,12 @@ public struct Merge: Procedure {
     private let expression: String?
     private let all: Bool
     private let parent: Bool
-    private let shouldPullSourceBranch: Bool
 
-    public init(branch: String?, all: Bool, parent: Bool, expression: String?, shouldPullSourceBranch: Bool) {
+    public init(branch: String?, all: Bool, parent: Bool, expression: String?) {
         self.branch = branch
         self.all = all
         self.parent = parent
         self.expression = expression
-        self.shouldPullSourceBranch = shouldPullSourceBranch
     }
 
     public func run() -> Bool {
@@ -43,12 +41,9 @@ public struct Merge: Procedure {
             branchToMerge = selection
         }
 
-        if shouldPullSourceBranch {
-            guard Env.current.git.checkout(branchToMerge),
-                Env.current.git.pull(),
-                Env.current.git.checkout(currentBranch) else { return false }
-        }
-
-        return Env.current.git.merge(branchToMerge)
+        return Env.current.git.checkout(branchToMerge)
+            && Env.current.git.pull()
+            && Env.current.git.checkout(currentBranch)
+            && Env.current.git.merge(branchToMerge)
     }
 }

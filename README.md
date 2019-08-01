@@ -179,8 +179,6 @@ Options:
       Print the usage description of 'merge'.
   -p, --parent
       Merge branch of parent issue into the current branch.
-  -P, --pull-source
-      Pull source branch before merging.
 
 flow playground, play, p
 Create a playground in temporary files and open it.

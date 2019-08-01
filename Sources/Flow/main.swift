@@ -295,14 +295,11 @@ Tool { flow in
                                       longName: "expression",
                                       description: "Search for a branch to merge containing the specified regex pattern.")
 
-        let shouldPullSourceBranch = cmd.option(shortName: "P", longName: "pull-source", description: "Pull source branch before merging.")
-
         cmd.handler {
             run(Merge(branch: branch.value,
                       all: all.wasSet,
                       parent: parent.wasSet,
-                      expression: expression.value,
-                      shouldPullSourceBranch: shouldPullSourceBranch.wasSet))
+                      expression: expression.value))
         }
     }
 
