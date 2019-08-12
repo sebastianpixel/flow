@@ -250,8 +250,13 @@ Reset username (saved in UserDefaults) and password (saved in Keychain).
 flow resolve-conflicts, resolve
 Open files with merge conflicts in vim tabs.
 
-flow status, st
+flow status, st <options>
 Set the status of the current JIRA issue.
+Options:
+  -h, --help
+      Print the usage description of 'status'.
+  -i, --issue <value>
+      Specify the issue key for which to set the transition.
 
 flow xcopen, open, o
 Open XCode workspace, project or playground in current working directory.

@@ -165,9 +165,15 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("status", "st", description: "Set the status of the current JIRA issue.") {
-        $0.handler {
-            run(SetTransition())
+    flow.registerCommand("status", "st", description: "Set the status of the current JIRA issue.") { cmd in
+
+        let issueKey = cmd.argument(String.self,
+                                    shortName: "i",
+                                    longName: "issue",
+                                    description: "Specify the issue key for which to set the transition.")
+
+        cmd.handler {
+            run(issueKey.value.map { SetTransition(issueKey: $0) } ?? SetTransition())
         }
     }
 
