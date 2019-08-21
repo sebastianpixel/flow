@@ -31,8 +31,6 @@ public struct MergePullRequest: Procedure {
             PostMergePullRequest(stashProject: project, repository: repository, pullRequestId: pullRequest.id, pullRequestVersion: pullRequest.version)
             .awaitResponseWithDebugPrinting() != nil else { return false }
 
-        let currentIssueKey = Env.current.jira.currentIssueKey()
-
         if Env.current.shell.promptDecision("Remove the remote branch?") {
             guard Env.current.git.deleteRemote(branch: pullRequest.fromRef.displayId) else { return false }
         }
@@ -43,8 +41,9 @@ public struct MergePullRequest: Procedure {
                 Env.current.git.pull() else { return false }
         }
 
-        if Env.current.shell.promptDecision("Update the JIRA issue?") {
-            guard SetTransition(issueKey: currentIssueKey).run() else { return false }
+        if let issueKey = pullRequest.fromRef.displayId.extracting(.jiraIssueKeyPattern),
+            Env.current.shell.promptDecision("Update \(issueKey)?") {
+            return SetTransition(issueKey: issueKey).run()
         }
 
         return true
