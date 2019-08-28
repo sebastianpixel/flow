@@ -16,7 +16,7 @@ public protocol Git {
     func add(_ files: [String]) -> Bool
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String]
     func branches(containing: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String]
-    func checkout(_ branch: String) -> Bool
+    func checkout(_ file: String) -> Bool
     func commit(message: String) -> Bool
     func createBranch(name: String) -> Bool
     func deleteLocal(branch: String, forced: Bool) -> Bool
@@ -223,8 +223,8 @@ class GitImpl: Git {
         return true
     }
 
-    func checkout(_ branch: String) -> Bool {
-        return Env.current.shell.run("git checkout \(branch)")
+    func checkout(_ file: String) -> Bool {
+        return Env.current.shell.run("git checkout \(file)")
     }
 
     func renameCurrentBranch(newName: String) -> Bool {

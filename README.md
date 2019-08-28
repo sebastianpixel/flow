@@ -117,6 +117,9 @@ Options:
       Open pull request of current branch if there is one or open currently
       open pull requests in current repository (if -j was not set).
 
+flow checkout, co
+Checkout untracked and unstaged files.
+
 flow commit, cm <options>
 Create a commit in the current repository. If no message was provided
 with the -m | --message argument a message template will be opened

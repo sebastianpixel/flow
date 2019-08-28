@@ -4,7 +4,7 @@ import UI
 
 public struct HandleFiles: Procedure {
     public enum Mode: String {
-        case add, remove
+        case add, remove, checkout
     }
 
     private let mode: Mode
@@ -39,6 +39,8 @@ public struct HandleFiles: Procedure {
         switch mode {
         case .add:
             return Env.current.git.add(filePaths)
+        case .checkout:
+            return Env.current.git.checkout(filePaths.joined(separator: " "))
         case .remove:
             var directories = [URL: Set<URL>]()
             var success = true

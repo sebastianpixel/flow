@@ -339,6 +339,12 @@ Tool { flow in
         }
     }
 
+    flow.registerCommand("checkout", "co", description: "Checkout untracked and unstaged files.") {
+        $0.handler {
+            run(HandleFiles(.checkout, untracked: true, unstaged: true))
+        }
+    }
+
     flow.registerCommand("generate-readme", "readme", description: "Generate README.md.") {
         $0.handler {
             run(GenerateReadme(usageDescription: flow.usageDescription(ansi: false)))
