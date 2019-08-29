@@ -339,9 +339,9 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("checkout", "co", description: "Checkout untracked and unstaged files.") {
+    flow.registerCommand("checkout", "co", description: "Checkout unstaged files.") {
         $0.handler {
-            run(HandleFiles(.checkout, untracked: true, unstaged: true))
+            run(HandleFiles(.checkout, untracked: false, unstaged: true))
         }
     }
 
