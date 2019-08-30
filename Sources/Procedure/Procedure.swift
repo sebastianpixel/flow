@@ -38,7 +38,7 @@ extension Procedure {
     }
 
     func getCommitters(stashProject: String, repo: String) -> Future<Result<[User], Error>> {
-        return GetLastCommits(stashProject: stashProject, repo: repo, limit: 250)
+        return GetLastCommits(stashProject: stashProject, repo: repo, limit: 500)
             .request()
             .map { result -> Result<[User], Error> in
                 result.map { response -> [User] in
