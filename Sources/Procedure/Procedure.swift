@@ -48,7 +48,6 @@ extension Procedure {
                             guard commit.committer.active == true, set.insert(commit.committer).inserted else { return }
                             users.append(commit.committer)
                         }
-                        .sorted { $0.name > $1.name }
                 }
             }
     }

@@ -150,14 +150,20 @@ public final class CreatePullRequest: Procedure {
                     self.getCommitters(stashProject: stashProject, repo: repo).map { result in
                         result.flatMap { committers -> Result<[String], Swift.Error> in
                             if !committers.isEmpty,
-                                let lineSelector = LineSelector(dataSource: GenericLineSelectorDataSource(items: Array(Set(committers)), line: \.description)),
+                                let lineSelector = LineSelector(
+                                    dataSource: GenericLineSelectorDataSource(
+                                        items: committers
+                                            .filter { $0.name != Env.current.login.username }
+                                            .sorted { $0.name > $1.name },
+                                        line: \.description)
+                                ),
                                 let selection = lineSelector.multiSelection() {
                                 return .success(selection.output.map { $0.name })
                             } else {
                                 return .failure(Error.noReviewersReceived)
                             }
                         }
-                    }
+                }
             }
         }
     }
