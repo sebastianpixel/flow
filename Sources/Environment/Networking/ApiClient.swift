@@ -16,7 +16,7 @@ public struct BitbucketError: Decodable {
     public let errors: [BitbucketServiceException]
 
     public var messagesConcatenated: String {
-        return errors.reduce(into: "", { $0 += " \($1.message)" }).trimmingCharacters(in: .whitespaces)
+        return errors.reduce(into: "", { $0 += "\n\($1.message)" }).trimmingCharacters(in: .newlines)
     }
 }
 
