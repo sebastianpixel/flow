@@ -49,10 +49,15 @@ public struct AssignIssue: Procedure {
             if Env.current.debug {
                 Env.current.shell.write("\(failure)")
             }
-            if case Error.noAssignee = failure {
+            switch failure {
+            case let ApiClientError.status(_, bitbucketError?):
+                Env.current.shell.write(bitbucketError.messagesConcatenated)
+                return false
+            case Error.noAssignee:
                 return true
+            default:
+                return false
             }
-            return false
         }
     }
 }

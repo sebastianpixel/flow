@@ -113,6 +113,9 @@ public final class CreatePullRequest: Procedure {
                 Env.current.shell.write("\(failure)")
             }
             switch failure {
+            case let ApiClientError.status(_, bitbucketError?):
+                Env.current.shell.write(bitbucketError.messagesConcatenated)
+                return false
             case Error.noBranchSelected, Error.noIssueKey, Error.noTitleProvided:
                 // User opt-out
                 return true
@@ -120,6 +123,14 @@ public final class CreatePullRequest: Procedure {
                 return false
             }
         }
+    }
+
+    struct StashError: Decodable {
+        struct SingleStashError: Decodable {
+            let message: String
+            let exeptionName: String
+        }
+        let errors: [SingleStashError]
     }
 
     private func reviewers(stashProject: String, repo: String, defaultReviewers: Bool) -> Future<Result<[String], Swift.Error>> {

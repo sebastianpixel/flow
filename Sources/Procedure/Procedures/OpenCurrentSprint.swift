@@ -27,7 +27,12 @@ public struct OpenCurrentSprint: Procedure {
                 return .success(Env.current.workspace.open(url))
             }
             .mapError { error -> Swift.Error in
-                if Env.current.debug { Env.current.shell.write("\(error)") }
+                if case let ApiClientError.status(_, bitbucketError?) = error {
+                    Env.current.shell.write(bitbucketError.messagesConcatenated)
+                }
+                if Env.current.debug {
+                    Env.current.shell.write("\(error)")
+                }
                 return error
             }
             .isSuccess

@@ -6,10 +6,22 @@ public enum ApiClientError: Error {
     case
         noResponse,
         captchaChallenge,
-        status(Int, String?),
+        status(Int, BitbucketError?),
         noData,
         request(Swift.Error),
         decoding(Swift.Error)
+}
+
+public struct BitbucketError: Decodable {
+    public let errors: [BitbucketServiceException]
+
+    public var messagesConcatenated: String {
+        return errors.reduce(into: "", { $0 += " \($1.message)" }).trimmingCharacters(in: .whitespaces)
+    }
+}
+
+public struct BitbucketServiceException: Decodable {
+    public let message: String
 }
 
 public struct ApiClient {
@@ -41,7 +53,7 @@ public struct ApiClient {
                     }
 
                     guard 200 ..< 300 ~= urlResponse.statusCode else {
-                        throw ApiClientError.status(urlResponse.statusCode, data.flatMap { String(data: $0, encoding: .utf8) })
+                        throw ApiClientError.status(urlResponse.statusCode, try data?.decoded())
                     }
 
                     guard let data = data else {
