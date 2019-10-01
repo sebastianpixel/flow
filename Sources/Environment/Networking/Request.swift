@@ -26,7 +26,7 @@ extension Request {
             if Env.current.debug {
                 Env.current.shell.write("\(failure)")
             } else if case let ApiClientError.status(_, exception?) = failure {
-                Env.current.shell.write(exception.messagesConcatenated)
+                Env.current.shell.write(exception.message)
             }
             return nil
         }

@@ -28,7 +28,7 @@ public struct OpenCurrentSprint: Procedure {
             }
             .mapError { error -> Swift.Error in
                 if case let ApiClientError.status(_, bitbucketError?) = error {
-                    Env.current.shell.write(bitbucketError.messagesConcatenated)
+                    Env.current.shell.write(bitbucketError.message)
                 }
                 if Env.current.debug {
                     Env.current.shell.write("\(error)")

@@ -88,7 +88,7 @@ public struct Initialize: Procedure {
             }
             switch failure {
             case let ApiClientError.status(_, bitbucketError?):
-                Env.current.shell.write(bitbucketError.messagesConcatenated)
+                Env.current.shell.write(bitbucketError.message)
                 return false
             case Error.userOptOut:
                 return true

@@ -15,13 +15,14 @@ public enum ApiClientError: Error {
 public struct BitbucketError: Decodable {
     public let errors: [BitbucketServiceException]
 
-    public var messagesConcatenated: String {
-        return errors.reduce(into: "", { $0 += "\n\($1.message)" }).trimmingCharacters(in: .newlines)
+    public var message: String {
+        return String(errors.reduce(into: "", { $0 += "\($1.message) (\($1.exceptionName)\n" }).dropLast("\n".count))
     }
 }
 
 public struct BitbucketServiceException: Decodable {
     public let message: String
+    public let exceptionName: String
 }
 
 public struct ApiClient {
