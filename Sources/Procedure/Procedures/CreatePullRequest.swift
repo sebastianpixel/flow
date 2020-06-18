@@ -56,16 +56,15 @@ public final class CreatePullRequest: Procedure {
             .await()
             .flatMap { [weak self] destinationBranch, reviewers -> Result<PostPullRequest.Response, Swift.Error> in
                 guard let self = self else { return .failure(Error.selfDeallocated) }
-                let title, description: String
-                let defaultTitle = self.createDefaultTitle(from: currentBranch)
-                if self.noEdit {
-                    title = defaultTitle
-                    description = ""
-                } else {
-                    switch self.promptToCreateTitleAndDescription(defaultTitle: defaultTitle) {
+                var title = Env.current.defaults.get(String.self, for: .lastPRTitle) ?? self.createDefaultTitle(from: currentBranch)
+                var description = Env.current.defaults.get(String.self, for: .lastPRDescription) ?? ""
+                if !self.noEdit {
+                    switch self.promptToCreateTitleAndDescription(defaultTitle: title, defaultDescription: description) {
                     case let .success(success):
                         title = success.title
+                        Env.current.defaults[.lastPRTitle] = title
                         description = success.description
+                        Env.current.defaults[.lastPRDescription] = description
                     case let .failure(failure):
                         return .failure(failure)
                     }
@@ -102,6 +101,8 @@ public final class CreatePullRequest: Procedure {
 
         switch result {
         case .success:
+            Env.current.defaults.removeObject(for: .lastPRTitle)
+            Env.current.defaults.removeObject(for: .lastPRDescription)
             if browseAfterSuccessfulCreation,
                 let url = getUrlOfPullRequest(branch: currentBranch) {
                 return Env.current.workspace.open(url)
@@ -204,10 +205,12 @@ public final class CreatePullRequest: Procedure {
         }
     }
 
-    private func promptToCreateTitleAndDescription(defaultTitle: String) -> Result<(title: String, description: String), Swift.Error> {
+    private func promptToCreateTitleAndDescription(defaultTitle: String, defaultDescription: String) -> Result<(title: String, description: String), Swift.Error> {
         let tempFile: File
         do {
-            tempFile = try Env.current.file.init(write: { template(branch: defaultTitle) })
+            tempFile = try Env.current.file.init(write: {
+                template(branch: defaultTitle, description: defaultDescription)
+            })
         } catch {
             return .failure(error)
         }
@@ -254,13 +257,13 @@ public final class CreatePullRequest: Procedure {
         }
     }
 
-    private func template(branch: String) -> String {
+    private func template(branch: String, description: String = .init()) -> String {
         return """
         # Title
         \(branch)
 
         # Description (optional)
-
+        \(description)
         """
     }
 }
