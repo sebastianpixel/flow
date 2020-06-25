@@ -421,7 +421,7 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("cherry-pick", "cp", description: "Cherry pick a commit in selected branch") { cmd in
+    flow.registerCommand("cherry-pick", "cp", description: "Cherry pick a commit from a selected branch.") { cmd in
         cmd.handler {
             run(CherryPick())
         }
