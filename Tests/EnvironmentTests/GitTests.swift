@@ -328,6 +328,18 @@ class GitTests: XCTestCase {
         _ = git.renameCurrentBranch(newName: "myOtherBranch")
         XCTAssertEqual(commands.last, "git branch -m myOtherBranch")
     }
+
+    func testCherryPick() {
+        booleanReturn = [true]
+        _ = git.cherryPick(.init(shortHash: "shortHash", subject: "subject"))
+        XCTAssertEqual(commands.last, "git cherry-pick shortHash")
+    }
+
+    func testDifference() {
+        booleanReturn = [true]
+        _ = git.difference(of: "branchA", to: "branchB")
+        XCTAssertEqual(commands.last, "git --no-pager log --cherry-pick --oneline branchA...branchB --left-right --no-merges --no-color --pretty=format:\"%m_section_%h_section_%s\"")
+    }
 }
 
 extension GitService {
