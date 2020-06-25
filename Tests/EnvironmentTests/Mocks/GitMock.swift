@@ -135,4 +135,14 @@ class GitMock: Git {
     func status(verbose: Bool) -> String? {
         return statusCallback(verbose)
     }
+
+    var cherryPickCallback: (GitCommit) -> Bool = { _ in false }
+    func cherryPick(_ commit: GitCommit) -> Bool {
+        return cherryPickCallback(commit)
+    }
+
+    var differenceCallback: (String, String) -> (additionsInA: [GitCommit], additionsInB: [GitCommit]) = { _, _ in ([], []) }
+    func difference(of branchA: String, to branchB: String) -> (additionsInA: [GitCommit], additionsInB: [GitCommit]) {
+        return differenceCallback(branchA, branchB)
+    }
 }

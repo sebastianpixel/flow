@@ -17,10 +17,12 @@ public protocol Git {
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String]
     func branches(containing: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String]
     func checkout(_ file: String) -> Bool
+    func cherryPick(_ commit: GitCommit) -> Bool
     func commit(message: String) -> Bool
     func createBranch(name: String) -> Bool
     func deleteLocal(branch: String, forced: Bool) -> Bool
     func deleteRemote(branch: String) -> Bool
+    func difference(of branchA: String, to branchB: String) -> (additionsInA: [GitCommit], additionsInB: [GitCommit])
     func fetch() -> Bool
     func listFiles(_ fileTypes: [GitFileType]) -> [String]
     func merge(_ branch: String) -> Bool
@@ -59,6 +61,10 @@ public enum GitBranchType {
         }
         return "--\(flag)"
     }
+}
+
+public struct GitCommit: Equatable {
+    public let shortHash, subject: String
 }
 
 public enum GitFileType {
@@ -155,6 +161,28 @@ class GitImpl: Git {
         return Env.current.shell.run("git push origin :\(branch)")
     }
 
+    func difference(of branchA: String, to branchB: String) -> (additionsInA: [GitCommit], additionsInB: [GitCommit]) {
+        let markerForSplitting = "_section_"
+        var additionsInA = [GitCommit]()
+        var additionsInB = [GitCommit]()
+
+        Env.current.shell.run("git --no-pager log --cherry-pick --oneline \(branchA)...\(branchB) --left-right --no-merges --no-color --pretty=format:\"%m\(markerForSplitting)%h\(markerForSplitting)%s\"")?
+            .components(separatedBy: .newlines)
+            .lazy
+            .map { $0.components(separatedBy: markerForSplitting) }
+            .filter { $0.count == 3 }
+            .forEach {
+                let commit = GitCommit(shortHash: $0[1], subject: $0[2])
+                switch $0[0] {
+                case "<": additionsInA.append(commit)
+                case ">": additionsInB.append(commit)
+                default: return
+                }
+        }
+
+        return (additionsInA, additionsInB)
+    }
+
     func branches(containing pattern: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String] {
         return branches(.all, excludeCurrent: excludeCurrent).filter { $0.range(of: pattern, options: options) != nil }
     }
@@ -221,6 +249,10 @@ class GitImpl: Git {
             }
         }
         return true
+    }
+
+    func cherryPick(_ commit: GitCommit) -> Bool {
+        return Env.current.shell.run("git cherry-pick \(commit.shortHash)")
     }
 
     func checkout(_ file: String) -> Bool {

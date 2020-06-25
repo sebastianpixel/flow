@@ -420,4 +420,10 @@ Tool { flow in
             run(Reminders(scope: scope, remindersToAdd: remindersToAdd.value))
         }
     }
+
+    flow.registerCommand("cherry-pick", "cp", description: "Cherry pick a commit in selected branch") { cmd in
+        cmd.handler {
+            run(CherryPick())
+        }
+    }
 }

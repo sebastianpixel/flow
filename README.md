@@ -118,7 +118,10 @@ Options:
       open pull requests in current repository (if -j was not set).
 
 flow checkout, co
-Checkout untracked and unstaged files.
+Checkout unstaged files.
+
+flow cherry-pick, cp
+Cherry pick a commit in selected branch
 
 flow commit, cm <options>
 Create a commit in the current repository. If no message was provided
