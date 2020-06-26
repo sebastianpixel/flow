@@ -16,7 +16,7 @@ public struct BitbucketError: Decodable {
     public let errors: [BitbucketServiceException]
 
     public var message: String {
-        return String(errors.reduce(into: "", { $0 += "\($1.message) (\($1.exceptionName))\n" }).dropLast("\n".count))
+        String(errors.reduce(into: "", { $0 += "\($1.message) (\($1.exceptionName))\n" }).dropLast("\n".count))
     }
 }
 

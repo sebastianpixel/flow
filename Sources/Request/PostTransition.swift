@@ -15,7 +15,7 @@ public struct PostTransition: Request {
 
     public let method = HTTPMethod.post
     public let host = Env.current.jira.host
-    public var path: String { return "/rest/api/2/issue/\(issueKey)/transitions" }
+    public var path: String { "/rest/api/2/issue/\(issueKey)/transitions" }
     public var httpBody: Data? {
         let body = [
             "transition": [

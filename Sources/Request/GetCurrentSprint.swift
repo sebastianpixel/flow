@@ -16,7 +16,7 @@ public struct GetCurrentSprint: Request {
     public let path = "/rest/greenhopper/1.0/integration/teamcalendars/sprint/list"
     public let httpBody = Data?.none
     public var queryItems: [URLQueryItem] {
-        return [
+        [
             .init(name: "jql", value: "project=\(jiraProject)+and+Sprint+not+in+closedSprints()")
         ]
     }

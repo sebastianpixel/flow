@@ -24,7 +24,7 @@ public final class Issue {
 
 extension Issue: Equatable {
     public static func == (lhs: Issue, rhs: Issue) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
             && lhs.key == rhs.key
             && lhs.fields == rhs.fields
     }
@@ -82,7 +82,7 @@ public extension Issue {
         public let name: String
 
         public var displayName: String {
-            return name.lowercased().contains("bug") ? "bugfix" : "feature"
+            name.lowercased().contains("bug") ? "bugfix" : "feature"
         }
 
         public enum Name: String {
@@ -96,11 +96,11 @@ public extension Issue {
                 unplanned = "Unplanned"
 
             public var jqlSearchTerm: String {
-                return #""\#(rawValue.replacingOccurrences(of: " ", with: "+"))""#
+                #""\#(rawValue.replacingOccurrences(of: " ", with: "+"))""#
             }
 
             public var issueType: IssueType {
-                return IssueType(name: rawValue)
+                IssueType(name: rawValue)
             }
         }
     }

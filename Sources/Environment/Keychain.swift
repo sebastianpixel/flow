@@ -29,7 +29,7 @@ struct KeychainImpl: Keychain {
     }
 
     func create(password: String, account: String) -> Result<Void, Swift.Error> {
-        return data(from: password).flatMap { data in
+        data(from: password).flatMap { data in
             let query: NSDictionary = [
                 kSecClass: kSecClassGenericPassword,
                 kSecAttrService: Env.current.toolName,
@@ -68,7 +68,7 @@ struct KeychainImpl: Keychain {
     }
 
     func update(password: String, account: String) -> Result<Void, Swift.Error> {
-        return data(from: password).flatMap { data in
+        data(from: password).flatMap { data in
             let query: NSDictionary = [
                 kSecClass: kSecClassGenericPassword,
                 kSecAttrService: Env.current.toolName,

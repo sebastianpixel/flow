@@ -6,6 +6,6 @@ struct LoginMock: Login {
     let password = "PasswordMock"
 
     func renew(prompt _: Bool) -> Result<Login, Error> {
-        return .success(self)
+        .success(self)
     }
 }

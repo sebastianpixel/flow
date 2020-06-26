@@ -15,7 +15,7 @@ public struct GetDefaultReviewers: Request {
 
     public let method = HTTPMethod.get
     public let host = Env.current.git.host
-    public var path: String { return "/rest/default-reviewers/latest/projects/\(stashProject)/repos/\(repo)/conditions" }
+    public var path: String { "/rest/default-reviewers/latest/projects/\(stashProject)/repos/\(repo)/conditions" }
     public let httpBody = Data?.none
     public let queryItems = [URLQueryItem]()
 }

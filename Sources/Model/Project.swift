@@ -6,6 +6,6 @@ public struct Project: Codable, CustomStringConvertible, Equatable {
     public typealias Response = [Project]
 
     public var description: String {
-        return "\(key) \"\(name)\""
+        "\(key) \"\(name)\""
     }
 }

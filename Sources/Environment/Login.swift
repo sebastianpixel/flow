@@ -53,7 +53,7 @@ final class LoginImpl: Login {
     }
 
     private func getUsername() -> Result<String, Swift.Error> {
-        return Result<String, Swift.Error> {
+        Result<String, Swift.Error> {
             if let username = Env.current.defaults[.username] as String? {
                 return username
             } else {

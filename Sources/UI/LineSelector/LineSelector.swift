@@ -9,7 +9,7 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
 
     private class Line: Equatable {
         static func == (lhs: LineSelector<DataSource>.Line, rhs: LineSelector<DataSource>.Line) -> Bool {
-            return lhs.text == rhs.text
+            lhs.text == rhs.text
         }
 
         var text: String
@@ -254,7 +254,7 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
 
     /// Returns an array of lines in the given array that contains the provided string.
     private func filter(_ lines: [Line], containing substring: String) -> [Line] {
-        return lines.compactMap { line in
+        lines.compactMap { line in
             let text = line.item.line
 
             if line.isSelected {
@@ -309,7 +309,7 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
 
     /// Performs a lookup for a line at a provided index in `filteredLines` without creating a new Array.
     private func filteredLine(at index: Int) -> Line? {
-        return filteredLines
+        filteredLines
             .index(drawnRange.startIndex, offsetBy: index, limitedBy: drawnRange.endIndex)
             .map { filteredLines[$0] }
     }

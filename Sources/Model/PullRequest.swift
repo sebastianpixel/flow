@@ -51,7 +51,7 @@ public struct PullRequest: Codable, CustomStringConvertible, Equatable {
     }
 
     public var description: String {
-        return "\(title); \(reviewers.map { "\($0.user.displayName.map { "\($0) " } ?? "")\($0.statusEmoji)" }.joined(separator: ", "))"
+        "\(title); \(reviewers.map { "\($0.user.displayName.map { "\($0) " } ?? "")\($0.statusEmoji)" }.joined(separator: ", "))"
     }
 
     public struct Response: Codable {

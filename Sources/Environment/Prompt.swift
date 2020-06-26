@@ -9,14 +9,14 @@ public struct Prompt {
     }
 
     public var textProperties: TextProperties {
-        return .init(color, nil, .bold)
+        .init(color, nil, .bold)
     }
 
     public var prefix: String {
-        return textProperties.apply(to: Prompt.raw)
+        textProperties.apply(to: Prompt.raw)
     }
 
     public static var count: Int {
-        return raw.count
+        raw.count
     }
 }

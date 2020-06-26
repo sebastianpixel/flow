@@ -15,7 +15,7 @@ public struct PutIssueAssignee: Request {
 
     public let method = HTTPMethod.put
     public let host = Env.current.jira.host
-    public var path: String { return "/rest/api/2/issue/\(issueKey)" }
+    public var path: String { "/rest/api/2/issue/\(issueKey)" }
     public var httpBody: Data? {
         let body = [
             "fields": [

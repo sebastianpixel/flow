@@ -8,7 +8,7 @@ import Yams
 
 private extension EKReminder {
     var info: Reminders.Info? {
-        return notes.flatMap { try? Reminders.yamlDecoder.decode(from: $0) }
+        notes.flatMap { try? Reminders.yamlDecoder.decode(from: $0) }
     }
 }
 
@@ -17,7 +17,7 @@ public struct Reminders: Procedure {
         case add, complete, edit, remove, quit, defaultCalendar
 
         var shortcut: Character {
-            return rawValue.first!
+            rawValue.first!
         }
 
         var description: String {
@@ -197,7 +197,7 @@ public struct Reminders: Procedure {
     }
 
     private func promptTitlesToAdd() -> [String] {
-        return (try? lineReader
+        (try? lineReader
             .readLine(prompt: "Add new reminders (semicolon separated): ")
             .split(separator: ";")
             .map { $0.trimmingCharacters(in: .whitespaces) }) ?? []

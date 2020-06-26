@@ -17,11 +17,11 @@ public protocol Shell {
 
 struct ShellImpl: Shell {
     var editor: String {
-        return run("git config --global core.editor") ?? "vim"
+        run("git config --global core.editor") ?? "vim"
     }
 
     func prompt(_ str: String) -> String? {
-        return prompt(str, newline: false, silent: false)
+        prompt(str, newline: false, silent: false)
     }
 
     func prompt(_ str: String, newline: Bool, silent: Bool) -> String? {

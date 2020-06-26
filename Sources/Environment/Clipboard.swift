@@ -7,7 +7,7 @@ public protocol Clipboard {
 struct ClipboardImpl: Clipboard {
     var string: String? {
         get {
-            return NSPasteboard.general.string(forType: .string)
+            NSPasteboard.general.string(forType: .string)
         }
         set {
             if let newValue = newValue {

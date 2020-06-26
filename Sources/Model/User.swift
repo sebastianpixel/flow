@@ -4,6 +4,6 @@ public struct User: Codable, CustomStringConvertible, Hashable {
     public let active: Bool?
 
     public var description: String {
-        return "\(displayName.map { "\($0) " } ?? "")(\"\(name)\")"
+        "\(displayName.map { "\($0) " } ?? "")(\"\(name)\")"
     }
 }

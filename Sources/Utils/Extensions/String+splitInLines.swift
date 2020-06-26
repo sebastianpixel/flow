@@ -2,7 +2,7 @@ import Foundation
 
 public extension String {
     func splitBlockInLines(upToCharacters: Int) -> String {
-        return components(separatedBy: .newlines)
+        components(separatedBy: .newlines)
             .map { $0.splitLineInLines(upToCharacters: upToCharacters) }
             .joined(separator: "\n")
     }

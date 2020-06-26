@@ -8,7 +8,7 @@ public struct Future<A> {
     }
 
     public static func `return`(_ value: A) -> Future<A> {
-        return Future<A> { $0(value) }
+        Future<A> { $0(value) }
     }
 
     public func onResult(_ f: @escaping (A) -> Void) {
@@ -31,7 +31,7 @@ public struct Future<A> {
     }
 
     public func map<B>(_ f: @escaping (A) -> B) -> Future<B> {
-        return Future<B> { bToVoid in
+        Future<B> { bToVoid in
             self.onResult { a in
                 bToVoid(f(a))
             }
@@ -39,7 +39,7 @@ public struct Future<A> {
     }
 
     public func flatMap<B>(_ f: @escaping (A) -> Future<B>) -> Future<B> {
-        return Future<B> { bToVoid in
+        Future<B> { bToVoid in
             self.onResult { a in
                 f(a).onResult(bToVoid)
             }
@@ -47,11 +47,11 @@ public struct Future<A> {
     }
 
     public func apply<B>(_ f: Future<(A) -> B>) -> Future<B> {
-        return concat(f).map { $0.1($0.0) }
+        concat(f).map { $0.1($0.0) }
     }
 
     public func observe(on queue: DispatchQueue) -> Future<A> {
-        return Future<A> { aToVoid in
+        Future<A> { aToVoid in
             self.onResult { a in
                 queue.async {
                     aToVoid(a)
@@ -61,7 +61,7 @@ public struct Future<A> {
     }
 
     public func concat<B>(_ b: Future<B>) -> Future<(A, B)> {
-        return Future<(A, B)> { abToVoid in
+        Future<(A, B)> { abToVoid in
 
             let semaphore = DispatchSemaphore(value: 1)
 

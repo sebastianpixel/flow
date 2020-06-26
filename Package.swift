@@ -74,7 +74,7 @@ let package = Package(
     // https://github.com/nicholascross/Injectable/blob/master/Package.swift
     private let autoCorrect = #"""
     git --no-pager diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
-    swift run swiftformat . --disable strongifiedSelf --disable trailingClosures --commas  inline --swiftversion 5.3
+    swift run swiftformat . --disable strongifiedSelf --disable trailingClosures --commas inline --swiftversion 5.3
     swift run swiftlint autocorrect --path Sources/ Tests/
     git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
     diff .pre_format_hash .post_format_hash > /dev/null || {

@@ -15,7 +15,7 @@ public protocol Request {
 
 extension Request {
     public func request() -> Future<Result<Response, Swift.Error>> {
-        return ApiClient.request(self)
+        ApiClient.request(self)
     }
 
     public func awaitResponseWithDebugPrinting() -> Response? {

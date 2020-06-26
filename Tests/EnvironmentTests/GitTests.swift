@@ -3,7 +3,7 @@ import XCTest
 
 class GitTests: XCTestCase {
     let git = GitImpl()
-    var shell: ShellMock { return Env.current.shell as! ShellMock }
+    var shell: ShellMock { Env.current.shell as! ShellMock }
     var remote = GitService.stash.remote
 
     var commands = [String]()

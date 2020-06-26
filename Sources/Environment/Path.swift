@@ -12,11 +12,11 @@ public struct Path: ExpressibleByStringLiteral {
     }
 
     public func appending(_ component: String) -> Path {
-        return Path(url: url.appendingPathComponent(component))
+        Path(url: url.appendingPathComponent(component))
     }
 
     public func extending(with extension: String) -> Path {
-        return Path(stringLiteral: url.path.removingIfNeeded(suffix: "/").appending(`extension`))
+        Path(stringLiteral: url.path.removingIfNeeded(suffix: "/").appending(`extension`))
     }
 
     public static let current = Path(stringLiteral: FileManager.default.currentDirectoryPath)

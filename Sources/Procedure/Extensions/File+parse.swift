@@ -11,7 +11,7 @@ extension File {
      - Returns: The array of parsed lines.
      */
     func parse(markEndLinePrefix: String? = nil) -> [String] {
-        return parse(markSwitchToSecondBlockLinePrefix: nil, markEndLinePrefix: markEndLinePrefix).firstBlock
+        parse(markSwitchToSecondBlockLinePrefix: nil, markEndLinePrefix: markEndLinePrefix).firstBlock
     }
 
     /**

@@ -7,10 +7,10 @@ public protocol Workspace {
 
 struct WorkspaceImpl: Workspace {
     func open(_ url: URL) -> Bool {
-        return NSWorkspace.shared.open(url)
+        NSWorkspace.shared.open(url)
     }
 
     func openFile(_ fullPath: String) -> Bool {
-        return NSWorkspace.shared.openFile(fullPath)
+        NSWorkspace.shared.openFile(fullPath)
     }
 }

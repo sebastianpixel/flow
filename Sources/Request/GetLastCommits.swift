@@ -17,10 +17,10 @@ public struct GetLastCommits: Request {
 
     public let method = HTTPMethod.get
     public let host = Env.current.git.host
-    public var path: String { return "/rest/api/1.0/projects/\(stashProject)/repos/\(repo)/commits" }
+    public var path: String { "/rest/api/1.0/projects/\(stashProject)/repos/\(repo)/commits" }
     public let httpBody = Data?.none
     public var queryItems: [URLQueryItem] {
-        return [
+        [
             URLQueryItem(name: "limit", value: "\(limit)")
         ]
     }

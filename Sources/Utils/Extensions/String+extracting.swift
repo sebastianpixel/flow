@@ -4,7 +4,7 @@ public extension String {
     static let jiraIssueKeyPattern = "[[:upper:]]+[[:punct:]][[:digit:]]+"
 
     func extracting(_ pattern: String) -> String? {
-        return range(of: pattern, options: .regularExpression)
+        range(of: pattern, options: .regularExpression)
             .map { String(self[$0]) }
     }
 }

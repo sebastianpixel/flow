@@ -13,7 +13,7 @@ public struct GetIssueTransitions: Request {
 
     public let method = HTTPMethod.get
     public let host = Env.current.jira.host
-    public var path: String { return "/rest/api/2/issue/\(issueKey)/transitions" }
+    public var path: String { "/rest/api/2/issue/\(issueKey)/transitions" }
     public let httpBody = Data?.none
     public let queryItems = [URLQueryItem]()
 }

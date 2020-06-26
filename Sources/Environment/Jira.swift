@@ -6,13 +6,13 @@ public protocol Jira {
 
 public extension Jira {
     func currentIssueKey() -> String? {
-        return currentIssueKey(promptOnError: true)
+        currentIssueKey(promptOnError: true)
     }
 }
 
 struct JiraImpl: Jira {
     var currentProject: String? {
-        return currentIssueKey(promptOnError: false)?.extracting(.uppercasesPattern)
+        currentIssueKey(promptOnError: false)?.extracting(.uppercasesPattern)
     }
 
     func currentIssueKey(promptOnError: Bool) -> String? {
@@ -29,6 +29,6 @@ struct JiraImpl: Jira {
     }
 
     var host: String? {
-        return Env.current.git.domain.map { "jira.\($0)" }
+        Env.current.git.domain.map { "jira.\($0)" }
     }
 }

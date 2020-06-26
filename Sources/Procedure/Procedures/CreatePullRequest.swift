@@ -260,7 +260,7 @@ public final class CreatePullRequest: Procedure {
     }
 
     private func template(branch: String, description: String = .init()) -> String {
-        return """
+        """
         # Title
         \(branch)
 

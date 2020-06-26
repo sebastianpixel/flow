@@ -15,7 +15,7 @@ public struct PostMoveIssuesToSprint: Request {
 
     public let method = HTTPMethod.post
     public let host = Env.current.jira.host
-    public var path: String { return "/rest/agile/1.0/sprint/\(sprint.id)/issue" }
+    public var path: String { "/rest/agile/1.0/sprint/\(sprint.id)/issue" }
     public var httpBody: Data? {
         do {
             return try ["issues": issues.map { $0.key }].encoded()

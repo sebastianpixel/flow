@@ -15,7 +15,7 @@ public struct GetPullRequests: Request {
 
     public let method = HTTPMethod.get
     public var path: String {
-        return "/rest/api/1.0/projects/\(stashProject)/repos/\(repository)/pull-requests"
+        "/rest/api/1.0/projects/\(stashProject)/repos/\(repository)/pull-requests"
     }
 
     public let host = Env.current.git.host

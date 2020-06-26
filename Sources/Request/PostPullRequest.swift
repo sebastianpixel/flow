@@ -27,12 +27,12 @@ public struct PostPullRequest: Request {
     public typealias Response = Empty
 
     public let method = HTTPMethod.post
-    public var path: String { return "/rest/api/1.0/projects/\(stashProject)/repos/\(repository)/pull-requests" }
+    public var path: String { "/rest/api/1.0/projects/\(stashProject)/repos/\(repository)/pull-requests" }
     public let host = Env.current.git.host
     public let queryItems = [URLQueryItem]()
     public var httpBody: Data? {
         func branch(id: String) -> [String: Any] {
-            return [
+            [
                 "id": id,
                 "repository": [
                     "slug": repository,

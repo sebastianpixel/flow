@@ -36,11 +36,11 @@ public protocol Git {
 
 public extension Git {
     func branches(containing pattern: String) -> [String] {
-        return branches(containing: pattern, options: [], excludeCurrent: true)
+        branches(containing: pattern, options: [], excludeCurrent: true)
     }
 
     func branches(_ branchType: GitBranchType) -> [String] {
-        return branches(branchType, excludeCurrent: true)
+        branches(branchType, excludeCurrent: true)
     }
 }
 
@@ -82,7 +82,7 @@ public enum GitFileType {
 
 class GitImpl: Git {
     var domain: String? {
-        return remote?.domain
+        remote?.domain
     }
 
     var host: String? {
@@ -94,11 +94,11 @@ class GitImpl: Git {
     }
 
     var projectOrUser: String? {
-        return remote?.pathComponents.first
+        remote?.pathComponents.first
     }
 
     var currentRepo: String? {
-        return rootDirectory.map(URL.init(fileURLWithPath:))?.lastPathComponent
+        rootDirectory.map(URL.init(fileURLWithPath:))?.lastPathComponent
     }
 
     var currentService: GitService {
@@ -148,17 +148,17 @@ class GitImpl: Git {
     }
 
     var conflictedFiles: [String] {
-        return Env.current.shell.run("git diff --name-only --diff-filter=U")?
+        Env.current.shell.run("git diff --name-only --diff-filter=U")?
             .components(separatedBy: .newlines)
             .filter { !$0.isEmpty } ?? []
     }
 
     func deleteLocal(branch: String, forced: Bool) -> Bool {
-        return Env.current.shell.run("git branch -\(forced ? "D" : "d") \(branch)")
+        Env.current.shell.run("git branch -\(forced ? "D" : "d") \(branch)")
     }
 
     func deleteRemote(branch: String) -> Bool {
-        return Env.current.shell.run("git push origin :\(branch)")
+        Env.current.shell.run("git push origin :\(branch)")
     }
 
     func difference(of branchA: String, to branchB: String) -> (additionsInA: [GitCommit], additionsInB: [GitCommit]) {
@@ -184,59 +184,59 @@ class GitImpl: Git {
     }
 
     func branches(containing pattern: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String] {
-        return branches(.all, excludeCurrent: excludeCurrent).filter { $0.range(of: pattern, options: options) != nil }
+        branches(.all, excludeCurrent: excludeCurrent).filter { $0.range(of: pattern, options: options) != nil }
     }
 
     var isRepo: Bool {
-        return Env.current.shell.run("git rev-parse")
+        Env.current.shell.run("git rev-parse")
     }
 
     var remotes: String? {
-        return Env.current.shell.run("git remote -v")
+        Env.current.shell.run("git remote -v")
     }
 
     var rootDirectory: String? {
-        return Env.current.shell.run("git rev-parse --show-toplevel")
+        Env.current.shell.run("git rev-parse --show-toplevel")
     }
 
     var currentBranch: String? {
-        return Env.current.shell.run("git rev-parse --abbrev-ref HEAD")
+        Env.current.shell.run("git rev-parse --abbrev-ref HEAD")
     }
 
     func stagedDiff(linesOfContext: UInt) -> String? {
-        return Env.current.shell.run("git diff --staged --unified=\(linesOfContext)")
+        Env.current.shell.run("git diff --staged --unified=\(linesOfContext)")
     }
 
     var stagedFiles: String? {
-        return Env.current.shell.run("git diff --staged --name-only")
+        Env.current.shell.run("git diff --staged --name-only")
     }
 
     func status(verbose: Bool) -> String? {
-        return Env.current.shell.run("git status\(verbose ? " --verbose" : "")")
+        Env.current.shell.run("git status\(verbose ? " --verbose" : "")")
     }
 
     func push() -> Bool {
-        return Env.current.shell.runForegroundTask("git push")
+        Env.current.shell.runForegroundTask("git push")
     }
 
     func fetch() -> Bool {
-        return Env.current.shell.runForegroundTask("git fetch")
+        Env.current.shell.runForegroundTask("git fetch")
     }
 
     func pull() -> Bool {
-        return Env.current.shell.runForegroundTask("git pull")
+        Env.current.shell.runForegroundTask("git pull")
     }
 
     func merge(_ branch: String) -> Bool {
-        return Env.current.shell.runForegroundTask("git merge \(branch)")
+        Env.current.shell.runForegroundTask("git merge \(branch)")
     }
 
     func pushSetUpstream() -> Bool {
-        return currentBranch.map { Env.current.shell.runForegroundTask("git push --set-upstream origin \($0)") } ?? false
+        currentBranch.map { Env.current.shell.runForegroundTask("git push --set-upstream origin \($0)") } ?? false
     }
 
     func commit(message: String) -> Bool {
-        return Env.current.shell.runForegroundTask("git commit -m \"\(message)\"")
+        Env.current.shell.runForegroundTask("git commit -m \"\(message)\"")
     }
 
     func createBranch(name: String) -> Bool {
@@ -252,15 +252,15 @@ class GitImpl: Git {
     }
 
     func cherryPick(_ commit: GitCommit) -> Bool {
-        return Env.current.shell.run("git cherry-pick \(commit.shortHash)")
+        Env.current.shell.run("git cherry-pick \(commit.shortHash)")
     }
 
     func checkout(_ file: String) -> Bool {
-        return Env.current.shell.run("git checkout \(file)")
+        Env.current.shell.run("git checkout \(file)")
     }
 
     func renameCurrentBranch(newName: String) -> Bool {
-        return Env.current.shell.run("git branch -m \(newName)")
+        Env.current.shell.run("git branch -m \(newName)")
     }
 
     var remoteCache: (String, [String])?

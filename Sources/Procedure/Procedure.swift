@@ -13,7 +13,7 @@ extension Procedure {
     /// Tries to get a JIRA issue key from optional input that
     /// may already be the full key or only the issue number.
     func getIssueKey(from rawKey: String?) -> String? {
-        return rawKey?.extracting(.jiraIssueKeyPattern)
+        rawKey?.extracting(.jiraIssueKeyPattern)
             ?? rawKey?.extracting(.numbersPattern).flatMap { number -> String? in
                 (Env.current.jira.currentProject ?? getProjectFromAllAvailable()).map { "\($0)-\(number)" }
                     ?? Env.current.git.branch(containing: number, excludeCurrent: false)?.extracting(.jiraIssueKeyPattern)
@@ -38,7 +38,7 @@ extension Procedure {
     }
 
     func getCommitters(stashProject: String, repo: String) -> Future<Result<[User], Error>> {
-        return GetLastCommits(stashProject: stashProject, repo: repo, limit: 1000)
+        GetLastCommits(stashProject: stashProject, repo: repo, limit: 1000)
             .request()
             .map { result -> Result<[User], Error> in
                 result.map { response -> [User] in

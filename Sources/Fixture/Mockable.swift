@@ -8,7 +8,7 @@ public protocol Mockable {
 
 public extension Mockable where Self: Decodable {
     static var mock: Self {
-        return try! fixture.encoded.decoded(Self.self)
+        try! fixture.encoded.decoded(Self.self)
     }
 }
 

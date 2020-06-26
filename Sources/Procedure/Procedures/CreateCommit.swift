@@ -82,7 +82,7 @@ public struct CreateCommit: Procedure {
     }
 
     private func template(subject: String, body: String) -> String {
-        return """
+        """
         \(subject)\((subject + body).isEmpty ? "" : "\n")
         \(body)
         \(Env.current.git.status(verbose: false)?.components(separatedBy: .newlines).map { "# \($0)" }.joined(separator: "\n") ?? "")

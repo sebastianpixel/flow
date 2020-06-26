@@ -13,7 +13,7 @@ public struct GetIssue: Request {
 
     public let method = HTTPMethod.get
     public var path: String {
-        return "/rest/api/2/issue/\(issueKey)"
+        "/rest/api/2/issue/\(issueKey)"
     }
 
     public let host = Env.current.jira.host

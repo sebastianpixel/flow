@@ -41,11 +41,11 @@ struct FileImpl: File {
     }
 
     var exists: Bool {
-        return FileManager.default.fileExists(atPath: path.url.path)
+        FileManager.default.fileExists(atPath: path.url.path)
     }
 
     func read() throws -> String {
-        return try String(contentsOf: path.url, encoding: .utf8)
+        try String(contentsOf: path.url, encoding: .utf8)
     }
 
     func write(_ text: String) throws {

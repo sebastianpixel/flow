@@ -4,7 +4,7 @@ public enum Fixture {
     case empty, commits, issue, issues, pullRequests, reviewers, sprints, transitions, projects, epic
 
     public var encoded: Data {
-        return response.data(using: .utf8)!
+        response.data(using: .utf8)!
     }
 
     private var response: String {

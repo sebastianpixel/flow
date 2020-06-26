@@ -41,7 +41,7 @@ public struct IssueLineSelectorDataSource: LineSelectorDataSource {
     }
 
     private static func lastUpdated(_ pair: (parent: Issue, children: [Issue])) -> Date {
-        return pair.children.reduce(pair.parent.fields.updated ?? .distantPast) { result, current -> Date in
+        pair.children.reduce(pair.parent.fields.updated ?? .distantPast) { result, current -> Date in
             max(result, current.fields.updated ?? .distantPast)
         }
     }

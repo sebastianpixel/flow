@@ -13,11 +13,11 @@ final class Cursor {
     }
 
     var isInDefaultRow: Bool {
-        return row == defaultPosition.row
+        row == defaultPosition.row
     }
 
     var isInDefaultColumn: Bool {
-        return column == defaultPosition.column
+        column == defaultPosition.column
     }
 
     func resetRow() {

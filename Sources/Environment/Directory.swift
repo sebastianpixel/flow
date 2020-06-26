@@ -25,7 +25,7 @@ struct DirectoryImpl: Directory {
     let path: Path
 
     func contents() throws -> [URL] {
-        return try FileManager.default.contentsOfDirectory(at: path.url, includingPropertiesForKeys: nil, options: [])
+        try FileManager.default.contentsOfDirectory(at: path.url, includingPropertiesForKeys: nil, options: [])
     }
 
     init(path: Path, create: Bool) throws {
@@ -51,12 +51,12 @@ struct DirectoryImpl: Directory {
     }
 
     func file(_ name: String) -> File {
-        return Env.current.file.init(path: path.appending(name))
+        Env.current.file.init(path: path.appending(name))
     }
 
     @discardableResult
     func file(_ name: String, write: @autoclosure () -> String) throws -> File {
-        return try Env.current.file.init(path: path.appending(name), write: write)
+        try Env.current.file.init(path: path.appending(name), write: write)
     }
 
     func remove() throws {
