@@ -178,7 +178,7 @@ class GitImpl: Git {
                 case ">": additionsInB.append(commit)
                 default: return
                 }
-        }
+            }
 
         return (additionsInA, additionsInB)
     }

@@ -70,13 +70,13 @@ public final class CreatePullRequest: Procedure {
                     }
                 }
                 let result = PostPullRequest(stashProject: stashProject,
-                                       repository: repo,
-                                       title: title,
-                                       source: currentBranch,
-                                       destination: destinationBranch,
-                                       reviewers: reviewers,
-                                       description: description,
-                                       closeSourceBranch: true).request().await()
+                                             repository: repo,
+                                             title: title,
+                                             source: currentBranch,
+                                             destination: destinationBranch,
+                                             reviewers: reviewers,
+                                             description: description,
+                                             closeSourceBranch: true).request().await()
                 if copyPRDescriptionToClipboard,
                     result.isSuccess,
                     let url = getUrlOfPullRequest(branch: currentBranch)?.absoluteString {
@@ -131,6 +131,7 @@ public final class CreatePullRequest: Procedure {
             let message: String
             let exeptionName: String
         }
+
         let errors: [SingleStashError]
     }
 
@@ -167,7 +168,8 @@ public final class CreatePullRequest: Procedure {
                                         items: committers
                                             .filter { $0.name != Env.current.login.username }
                                             .sorted { $0.name > $1.name },
-                                        line: \.description)
+                                        line: \.description
+                                    )
                                 ),
                                 let selection = lineSelector.multiSelection() {
                                 return .success(selection.output.map { $0.name })
@@ -175,7 +177,7 @@ public final class CreatePullRequest: Procedure {
                                 return .failure(Error.noReviewersReceived)
                             }
                         }
-                }
+                    }
             }
         }
     }

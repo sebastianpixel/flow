@@ -3,7 +3,6 @@ import Foundation
 import Model
 
 public struct PostMoveIssuesToSprint: Request {
-
     private let sprint: Sprint
     private let issues: [Issue]
 
@@ -24,5 +23,6 @@ public struct PostMoveIssuesToSprint: Request {
             fatalError(error.localizedDescription)
         }
     }
+
     public let queryItems = [URLQueryItem]()
 }

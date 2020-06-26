@@ -48,20 +48,20 @@ public struct CreateCommit: Procedure {
                 write: { template(subject: subject, body: body) }
             ),
             Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(commitFile.path)") {
-                let content = commitFile.parse(markEndLinePrefix: "# On branch")
+            let content = commitFile.parse(markEndLinePrefix: "# On branch")
 
-                subject = content.first { !$0.isEmpty } ?? ""
+            subject = content.first { !$0.isEmpty } ?? ""
 
-                guard !subject.isEmpty else {
-                    Env.current.shell.write("Aborting commit due to empty subject.")
-                    return false
-                }
-
-                body = content.drop { $0.isEmpty || $0 == subject }
-                    .map { $0.splitLineInLines(upToCharacters: CreateCommit.maxCharactersInBodyLines) }
-                    .joined(separator: "\n")
-                    .trimmingCharacters(in: .newlines)
+            guard !subject.isEmpty else {
+                Env.current.shell.write("Aborting commit due to empty subject.")
+                return false
             }
+
+            body = content.drop { $0.isEmpty || $0 == subject }
+                .map { $0.splitLineInLines(upToCharacters: CreateCommit.maxCharactersInBodyLines) }
+                .joined(separator: "\n")
+                .trimmingCharacters(in: .newlines)
+        }
 
         var message = subject
         if !body.isEmpty {

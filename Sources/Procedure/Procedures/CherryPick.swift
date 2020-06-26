@@ -3,7 +3,6 @@ import Foundation
 import UI
 
 public struct CherryPick: Procedure {
-
     public init() {}
 
     public func run() -> Bool {
