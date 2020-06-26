@@ -331,7 +331,7 @@ class GitTests: XCTestCase {
 
     func testCherryPick() {
         booleanReturn = [true]
-        _ = git.cherryPick(.init(shortHash: "shortHash", subject: "subject"))
+        _ = git.cherryPick(.init(shortHash: "shortHash", subject: "subject", isMergeCommit: false))
         XCTAssertEqual(commands.last, "git cherry-pick shortHash")
     }
 
@@ -339,6 +339,24 @@ class GitTests: XCTestCase {
         booleanReturn = [true]
         _ = git.difference(of: "branchA", to: "branchB")
         XCTAssertEqual(commands.last, "git --no-pager log --cherry-pick --oneline branchA...branchB --left-right --no-merges --no-color --pretty=format:\"%m_section_%h_section_%s\"")
+    }
+
+    func testLog() {
+        booleanReturn = [true]
+        _ = git.log
+        XCTAssertEqual(commands.last, "git --no-pager log --oneline --pretty=format:\"%h_section_%s_section_%P\"")
+    }
+
+    func testRevertNonMergeCommit() {
+        booleanReturn = [true]
+        _ = git.revert(.init(shortHash: "shortHash", subject: "subject", isMergeCommit: false))
+        XCTAssertEqual(commands.last, "git revert shortHash")
+    }
+
+    func testRevertMergeCommit() {
+        booleanReturn = [true]
+        _ = git.revert(.init(shortHash: "shortHash", subject: "subject", isMergeCommit: true))
+        XCTAssertEqual(commands.last, "git revert -m 1 shortHash")
     }
 }
 

@@ -256,6 +256,9 @@ Reset username (saved in UserDefaults) and password (saved in Keychain).
 flow resolve-conflicts, resolve
 Open files with merge conflicts in vim tabs.
 
+flow revert, rv
+Select a commit to revert.
+
 flow status, st <options>
 Set the status of the current JIRA issue.
 Options:

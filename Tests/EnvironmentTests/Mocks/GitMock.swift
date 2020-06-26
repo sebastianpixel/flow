@@ -36,6 +36,11 @@ class GitMock: Git {
         isRepoCallback()
     }
 
+    var logCallback = { [GitCommit]() }
+    var log: [GitCommit] {
+        logCallback()
+    }
+
     var projectOrUserCallback = { String?.none }
     var projectOrUser: String? {
         projectOrUserCallback()
@@ -124,6 +129,11 @@ class GitMock: Git {
     var renameCurrentBranchCallback: (String) -> Bool = { _ in false }
     func renameCurrentBranch(newName: String) -> Bool {
         renameCurrentBranchCallback(newName)
+    }
+
+    var revertCallback: (GitCommit) -> Bool = { _ in false }
+    func revert(_ commit: GitCommit) -> Bool {
+        revertCallback(commit)
     }
 
     var stagedDiffCallback: (UInt) -> String? = { _ in nil }

@@ -12,6 +12,7 @@ public protocol Git {
     var projectOrUser: String? { get }
     var rootDirectory: String? { get }
     var stagedFiles: String? { get }
+    var log: [GitCommit] { get }
 
     func add(_ files: [String]) -> Bool
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String]
@@ -30,6 +31,7 @@ public protocol Git {
     func push() -> Bool
     func pushSetUpstream() -> Bool
     func renameCurrentBranch(newName: String) -> Bool
+    func revert(_ commit: GitCommit) -> Bool
     func stagedDiff(linesOfContext: UInt) -> String?
     func status(verbose: Bool) -> String?
 }
@@ -65,6 +67,7 @@ public enum GitBranchType {
 
 public struct GitCommit: Equatable {
     public let shortHash, subject: String
+    public let isMergeCommit: Bool
 }
 
 public enum GitFileType {
@@ -172,7 +175,7 @@ class GitImpl: Git {
             .map { $0.components(separatedBy: markerForSplitting) }
             .filter { $0.count == 3 }
             .forEach {
-                let commit = GitCommit(shortHash: $0[1], subject: $0[2])
+                let commit = GitCommit(shortHash: $0[1], subject: $0[2], isMergeCommit: false)
                 switch $0[0] {
                 case "<": additionsInA.append(commit)
                 case ">": additionsInB.append(commit)
@@ -209,6 +212,17 @@ class GitImpl: Git {
 
     var stagedFiles: String? {
         Env.current.shell.run("git diff --staged --name-only")
+    }
+
+    var log: [GitCommit] {
+        let markerForSplitting = "_section_"
+        return Env.current.shell.run("git --no-pager log --oneline --pretty=format:\"%h\(markerForSplitting)%s\(markerForSplitting)%P\"")?
+            .components(separatedBy: .newlines)
+            .lazy
+            .map { $0.components(separatedBy: markerForSplitting) }
+            .filter { $0.count == 3 }
+            .map { GitCommit(shortHash: $0[0], subject: $0[1], isMergeCommit: $0[2].components(separatedBy: .whitespaces).count > 1) }
+            ?? []
     }
 
     func status(verbose: Bool) -> String? {
@@ -261,6 +275,10 @@ class GitImpl: Git {
 
     func renameCurrentBranch(newName: String) -> Bool {
         Env.current.shell.run("git branch -m \(newName)")
+    }
+
+    func revert(_ commit: GitCommit) -> Bool {
+        Env.current.shell.runForegroundTask("git revert \(commit.isMergeCommit ? "-m 1 " : "")\(commit.shortHash)")
     }
 
     var remoteCache: (String, [String])?

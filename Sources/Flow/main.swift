@@ -426,4 +426,10 @@ Tool { flow in
             run(CherryPick())
         }
     }
+
+    flow.registerCommand("revert", "rv", description: "Select a commit to revert.") { cmd in
+        cmd.handler {
+            run(Revert())
+        }
+    }
 }
