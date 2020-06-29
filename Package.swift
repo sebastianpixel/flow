@@ -64,45 +64,51 @@ let package = Package(
 )
 
 #if canImport(PackageConfig)
-    import PackageConfig
+import PackageConfig
 
-    // When someone has run `git commit`, first run SwiftFormat.
-    // If there are any modifications then cancel the commit
-    // so changes can be reviewed.
-    // https://github.com/nicholascross/Injectable/blob/master/Package.swift
-    private let autoCorrect = #"""
-    git --no-pager diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
-    swift run swiftformat . --disable strongifiedSelf --disable trailingClosures --commas inline --swiftversion 5.3
-    git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
-    diff .pre_format_hash .post_format_hash > /dev/null || {
-        echo "Staged files modified during commit"
-        rm .pre_format_hash
-        rm .post_format_hash
-        exit 1
-    }
+// When someone has run `git commit`, first run SwiftFormat.
+// If there are any modifications then cancel the commit
+// so changes can be reviewed.
+// https://github.com/nicholascross/Injectable/blob/master/Package.swift
+private let autoCorrect = #"""
+git --no-pager diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
+swift run swiftformat . \
+    --disable strongifiedSelf \
+    --disable trailingClosures \
+    --commas inline \
+    --xcodeindentation enabled \
+    --ifdev no-indent \
+    --swiftversion 5.3
+git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
+diff .pre_format_hash .post_format_hash > /dev/null || {
+    echo "Staged files modified during commit"
     rm .pre_format_hash
     rm .post_format_hash
-    """#
+    exit 1
+}
+rm .pre_format_hash
+rm .post_format_hash
+"""#
 
-    private let generateReadme = #"""
-    if git --no-pager diff --staged --name-only | grep --silent --extended-regexp '(main|GenerateReadme)\.swift'; then
-        swift run flow generate-readme
-        if git --no-pager diff --name-only | grep --silent "README.md"; then
-            git add README.md
-        fi
+private let generateReadme = #"""
+if git --no-pager diff --staged --name-only | grep --silent --extended-regexp '(main|GenerateReadme)\.swift'; then
+    swift run flow generate-readme
+    if git --no-pager diff --name-only | grep --silent "README.md"; then
+        git add README.md
     fi
-    """#
+fi
+"""#
 
-    let config = PackageConfiguration([
-        "komondor": [
-            "pre-push": [
-                "swift test",
-                "swift build -c release"
-            ],
-            "pre-commit": [
-                autoCorrect,
-                generateReadme
-            ]
+let config = PackageConfiguration([
+    "komondor": [
+        "pre-push": [
+            "swift test",
+            "swift build -c release"
+        ],
+        "pre-commit": [
+            autoCorrect,
+            generateReadme
         ]
-    ]).write()
+    ]
+]).write()
 #endif

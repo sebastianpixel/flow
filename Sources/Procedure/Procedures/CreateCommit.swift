@@ -16,9 +16,9 @@ public struct CreateCommit: Procedure {
     public func run() -> Bool {
         guard let stagedFiles = Env.current.git.stagedFiles,
             !stagedFiles.isEmpty else {
-            let status = Env.current.git.status(verbose: false)
-            Env.current.shell.write(status ?? "Nothing to commit.")
-            return false
+                let status = Env.current.git.status(verbose: false)
+                Env.current.shell.write(status ?? "Nothing to commit.")
+                return false
         }
 
         var body = ""

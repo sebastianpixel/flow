@@ -12,8 +12,8 @@ public struct MergePullRequest: Procedure {
                 stashProject: project,
                 repository: repository
             )
-            .awaitResponseWithDebugPrinting()?
-            .values else { return false }
+        .awaitResponseWithDebugPrinting()?
+        .values else { return false }
 
         guard !pullRequests.isEmpty else {
             Env.current.shell.write("No open pull requests!")

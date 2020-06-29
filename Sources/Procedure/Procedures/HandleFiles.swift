@@ -29,8 +29,8 @@ public struct HandleFiles: Procedure {
 
         guard !paths.isEmpty,
             let rootDirectory = Env.current.git.rootDirectory else {
-            Env.current.shell.write("No relevant files found.")
-            return false
+                Env.current.shell.write("No relevant files found.")
+                return false
         }
 
         let dataSource = GenericLineSelectorDataSource(items: paths)

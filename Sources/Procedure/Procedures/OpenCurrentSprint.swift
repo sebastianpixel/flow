@@ -22,7 +22,7 @@ public struct OpenCurrentSprint: Procedure {
             .flatMap { response -> Result<Bool, Swift.Error> in
                 guard let currentSprint = response.sprints.first,
                     let url = URL(string: currentSprint.viewBoardsUrl) else {
-                    return .failure(Error.noCurrentSprint)
+                        return .failure(Error.noCurrentSprint)
                 }
                 return .success(Env.current.workspace.open(url))
             }

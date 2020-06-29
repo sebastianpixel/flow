@@ -299,7 +299,7 @@ class GitImpl: Git {
             let host = components.host?.components(separatedBy: .punctuationCharacters),
             let firstLevelDomain = host.last,
             let secondLevelDomain = host.dropLast().last
-        else { return nil }
+            else { return nil }
 
         let domain = [secondLevelDomain, firstLevelDomain].joined(separator: ".")
 

@@ -14,7 +14,7 @@ public struct SetTransition: Procedure {
             let response = GetIssueTransitions(issueKey: issueKey).awaitResponseWithDebugPrinting(),
             let transition = LineSelector(dataSource: GenericLineSelectorDataSource(items: response.transitions, line: \.name))?.singleSelection()?.output,
             PostTransition(issueKey: issueKey, transitionId: transition.id).awaitResponseWithDebugPrinting() != nil
-        else { return false }
+            else { return false }
         return true
     }
 }

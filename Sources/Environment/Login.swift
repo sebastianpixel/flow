@@ -59,7 +59,7 @@ final class LoginImpl: Login {
             } else {
                 guard let username = Env.current.shell.prompt("Enter your JIRA username"),
                     !username.isEmpty else {
-                    return try renew(prompt: false).get().username
+                        return try renew(prompt: false).get().username
                 }
                 Env.current.defaults[.username] = username
                 return username
