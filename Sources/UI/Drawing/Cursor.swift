@@ -16,10 +16,6 @@ final class Cursor {
         row == defaultPosition.row
     }
 
-    var isInDefaultColumn: Bool {
-        column == defaultPosition.column
-    }
-
     func resetRow() {
         row = defaultPosition.row
     }

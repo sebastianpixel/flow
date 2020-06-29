@@ -126,15 +126,6 @@ public final class CreatePullRequest: Procedure {
         }
     }
 
-    struct StashError: Decodable {
-        struct SingleStashError: Decodable {
-            let message: String
-            let exeptionName: String
-        }
-
-        let errors: [SingleStashError]
-    }
-
     private func reviewers(stashProject: String, repo: String, defaultReviewers: Bool) -> Future<Result<[String], Swift.Error>> {
         var reviewers = Future.return(Result<[String], Swift.Error>.failure(Error.noReviewersReceived))
         if defaultReviewers {

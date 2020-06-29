@@ -9,7 +9,7 @@ public protocol Login {
 
 final class LoginImpl: Login {
     enum Error: Swift.Error {
-        case optOut, noPassword
+        case optOut
     }
 
     lazy var username: String = {
