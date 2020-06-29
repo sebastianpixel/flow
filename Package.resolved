@@ -102,7 +102,7 @@
       },
       {
         "package": "SwiftLint",
-        "repositoryURL": "https://github.com/Realm/SwiftLint",
+        "repositoryURL": "https://github.com/Realm/SwiftLint.git",
         "state": {
           "branch": null,
           "revision": "b1c72069cafa6cdebfb9274806cd976c54d8dde5",

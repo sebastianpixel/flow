@@ -14,7 +14,6 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/sebastianpixel/swift-commandlinekit", .branch("master")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.44.14"),
-        .package(url: "https://github.com/Realm/SwiftLint", from: "0.32.0"),
         .package(url: "https://github.com/orta/Komondor", from: "1.0.4"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0")
     ],
@@ -67,15 +66,13 @@ let package = Package(
 #if canImport(PackageConfig)
     import PackageConfig
 
-    // When someone has run `git commit`, first
-    // run SwiftFormat and the auto-correcter for SwiftLint
+    // When someone has run `git commit`, first run SwiftFormat.
     // If there are any modifications then cancel the commit
     // so changes can be reviewed.
     // https://github.com/nicholascross/Injectable/blob/master/Package.swift
     private let autoCorrect = #"""
     git --no-pager diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
     swift run swiftformat . --disable strongifiedSelf --disable trailingClosures --commas inline --swiftversion 5.3
-    swift run swiftlint autocorrect --path Sources/ Tests/
     git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
     diff .pre_format_hash .post_format_hash > /dev/null || {
         echo "Staged files modified during commit"
