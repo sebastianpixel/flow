@@ -77,7 +77,7 @@ swift run swiftformat . \
     --disable trailingClosures \
     --commas inline \
     --xcodeindentation enabled \
-    --ifdev no-indent \
+    --ifdef no-indent \
     --swiftversion 5.3
 git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
 diff .pre_format_hash .post_format_hash > /dev/null || {
