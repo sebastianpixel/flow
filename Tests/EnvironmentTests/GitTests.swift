@@ -292,31 +292,6 @@ class GitTests: XCTestCase {
         XCTAssertEqual(commands.last, "git checkout -b myBranch")
     }
 
-    func testCreateBranchFailsWithoutRetry() {
-        booleanReturn = [false, false]
-        _ = git.createBranch(name: "myBranch")
-        XCTAssertEqual(commands, ["git checkout -b myBranch"])
-        XCTAssertEqual(prompts, ["Want to enter another branch name?"])
-    }
-
-    func testCreateBranchFailsWithFailedRetry() {
-        booleanReturn = [false, true, false, false]
-        stringReturn = ["myOtherBranch"]
-
-        _ = git.createBranch(name: "myBranch")
-        XCTAssertEqual(commands, ["git checkout -b myBranch", "git checkout -b myOtherBranch"])
-        XCTAssertEqual(prompts, ["Want to enter another branch name?", "", "Want to enter another branch name?"])
-    }
-
-    func testCreateBranchSucceedsOnRetry() {
-        booleanReturn = [false, true, false, true, true]
-        stringReturn = ["myOtherBranch", "myWholeOtherBranch"]
-
-        _ = git.createBranch(name: "myBranch")
-        XCTAssertEqual(commands, ["git checkout -b myBranch", "git checkout -b myOtherBranch", "git checkout -b myWholeOtherBranch"])
-        XCTAssertEqual(prompts, ["Want to enter another branch name?", "", "Want to enter another branch name?", ""])
-    }
-
     func testCheckout() {
         booleanReturn = [true]
         _ = git.checkout("myBranch")

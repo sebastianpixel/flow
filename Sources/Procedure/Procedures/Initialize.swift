@@ -36,7 +36,18 @@ public struct Initialize: Procedure {
             .map { issue -> String in
                 if Env.current.git.createBranch(name: issue.branchName) {
                     _ = Env.current.git.pushSetUpstream()
+                } else if let currentBranch = Env.current.git.currentBranch,
+                    Env.current.git.branches(.all, excludeCurrent: true).contains(currentBranch) {
+                    Env.current.shell.write("There is already a branch for \(issue.branchName).")
+                    if Env.current.shell.promptDecision("Want to check it out?") {
+                        _ = Env.current.git.checkout(issue.branchName)
+                    }
+                } else if Env.current.shell.promptDecision("Want to enter another branch name?") {
+                    if let branchName = Env.current.shell.prompt("Branch name:") {
+                        _ = Env.current.git.createBranch(name: branchName)
+                    }
                 }
+
                 return issue.key
             }
             .flatMap { issueKey -> Result<String, Swift.Error> in

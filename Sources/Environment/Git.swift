@@ -17,7 +17,7 @@ public protocol Git {
     func add(_ files: [String]) -> Bool
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String]
     func branches(containing: String, options: String.CompareOptions, excludeCurrent: Bool) -> [String]
-    func checkout(_ file: String) -> Bool
+    func checkout(_ branchOrFile: String) -> Bool
     func cherryPick(_ commit: GitCommit) -> Bool
     func commit(message: String) -> Bool
     func createBranch(name: String) -> Bool
@@ -254,23 +254,15 @@ class GitImpl: Git {
     }
 
     func createBranch(name: String) -> Bool {
-        if !Env.current.shell.runForegroundTask("git checkout -b \(name)") {
-            if Env.current.shell.promptDecision("Want to enter another branch name?"),
-                let newName = Env.current.shell.prompt("") {
-                return createBranch(name: newName)
-            } else {
-                return false
-            }
-        }
-        return true
+        Env.current.shell.run("git checkout -b \(name)")
     }
 
     func cherryPick(_ commit: GitCommit) -> Bool {
         Env.current.shell.run("git cherry-pick \(commit.shortHash)")
     }
 
-    func checkout(_ file: String) -> Bool {
-        Env.current.shell.run("git checkout \(file)")
+    func checkout(_ branchOrFile: String) -> Bool {
+        Env.current.shell.run("git checkout \(branchOrFile)")
     }
 
     func renameCurrentBranch(newName: String) -> Bool {
