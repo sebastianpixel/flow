@@ -82,8 +82,7 @@ swift run swiftformat . \
 git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
 diff .pre_format_hash .post_format_hash > /dev/null || {
     echo "Staged files modified during commit"
-    rm .pre_format_hash
-    rm .post_format_hash
+    rm .pre_format_hash .post_format_hash
     exit 1
 }
 rm .pre_format_hash .post_format_hash
