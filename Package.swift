@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -12,7 +12,7 @@ let package = Package(
         Product.executable(name: "flow", targets: ["Flow"])
     ],
     dependencies: [
-        .package(url: "https://github.com/sebastianpixel/swift-commandlinekit", .branch("master")),
+        .package(name: "CommandLineKit", url: "https://github.com/sebastianpixel/swift-commandlinekit", .branch("master")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.44.14"),
         .package(url: "https://github.com/orta/Komondor", from: "1.0.4"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0")
