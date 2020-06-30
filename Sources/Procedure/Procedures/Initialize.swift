@@ -34,12 +34,11 @@ public struct Initialize: Procedure {
 
         let result = issueResult
             .map { issue -> String in
-                if Env.current.git.createBranch(name: issue.branchName), Env.current.git.pushSetUpstream() {
-                    return issue.key
-                } else if Env.current.git.branches(.all, excludeCurrent: true).contains(issue.branchName),
+                if Env.current.git.createBranch(name: issue.branchName), Env.current.git.pushSetUpstream() {}
+                else if Env.current.git.branches(.all, excludeCurrent: true).contains(issue.branchName),
                     Env.current.shell.promptDecision("Want to check out \(issue.branchName)?"),
-                    Env.current.git.checkout(issue.branchName) {
-                } else if Env.current.shell.promptDecision("Want to enter another branch name?"),
+                    Env.current.git.checkout(issue.branchName) {}
+                else if Env.current.shell.promptDecision("Want to enter another branch name?"),
                     let branchName = Env.current.shell.prompt("Branch name:"),
                     Env.current.git.createBranch(name: branchName), Env.current.git.pushSetUpstream() {}
 
