@@ -321,7 +321,7 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("reset-login", "reset", description: "Reset username (saved in UserDefaults) and password (saved in Keychain).") {
+    flow.registerCommand("reset-login", description: "Reset username (saved in UserDefaults) and password (saved in Keychain).") {
         $0.handler {
             run(ResetLogin())
         }
@@ -430,6 +430,12 @@ Tool { flow in
     flow.registerCommand("revert", "rv", description: "Select a commit to revert.") { cmd in
         cmd.handler {
             run(Revert())
+        }
+    }
+
+    flow.registerCommand("reset", "rs", description: "Unstage one or more files.") { cmd in
+        cmd.handler {
+            run(Reset())
         }
     }
 }

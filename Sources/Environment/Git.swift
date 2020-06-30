@@ -11,7 +11,7 @@ public protocol Git {
     var isRepo: Bool { get }
     var projectOrUser: String? { get }
     var rootDirectory: String? { get }
-    var stagedFiles: String? { get }
+    var stagedFiles: [String] { get }
     var log: [GitCommit] { get }
 
     func add(_ files: [String]) -> Bool
@@ -32,6 +32,7 @@ public protocol Git {
     func pushSetUpstream() -> Bool
     func renameCurrentBranch(newName: String) -> Bool
     func revert(_ commit: GitCommit) -> Bool
+    func reset(_ file: String) -> Bool
     func stagedDiff(linesOfContext: UInt) -> String?
     func status(verbose: Bool) -> String?
 }
@@ -210,8 +211,8 @@ class GitImpl: Git {
         Env.current.shell.run("git diff --staged --unified=\(linesOfContext)")
     }
 
-    var stagedFiles: String? {
-        Env.current.shell.run("git diff --staged --name-only")
+    var stagedFiles: [String] {
+        Env.current.shell.run("git diff --staged --name-only")?.components(separatedBy: .newlines) ?? []
     }
 
     var log: [GitCommit] {
@@ -271,6 +272,10 @@ class GitImpl: Git {
 
     func revert(_ commit: GitCommit) -> Bool {
         Env.current.shell.runForegroundTask("git revert \(commit.isMergeCommit ? "-m 1 " : "")\(commit.shortHash)")
+    }
+
+    func reset(_ file: String) -> Bool {
+        Env.current.shell.run("git reset \(file)")
     }
 
     var remoteCache: (String, [String])?
