@@ -37,12 +37,11 @@ public struct Initialize: Procedure {
                 if Env.current.git.createBranch(name: issue.branchName), Env.current.git.pushSetUpstream() {
                     return issue.key
                 } else if Env.current.git.branches(.all, excludeCurrent: true).contains(issue.branchName),
-                    Env.current.shell.promptDecision("Want to check out \(issue.branchName)?") {
-                    _ = Env.current.git.checkout(issue.branchName)
+                    Env.current.shell.promptDecision("Want to check out \(issue.branchName)?"),
+                    Env.current.git.checkout(issue.branchName) {
                 } else if Env.current.shell.promptDecision("Want to enter another branch name?"),
                     let branchName = Env.current.shell.prompt("Branch name:"),
-                    Env.current.git.createBranch(name: branchName), Env.current.git.pushSetUpstream() {
-                }
+                    Env.current.git.createBranch(name: branchName), Env.current.git.pushSetUpstream() {}
 
                 return issue.key
             }
