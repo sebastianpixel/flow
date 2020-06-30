@@ -34,8 +34,8 @@ public struct Initialize: Procedure {
 
         let result = issueResult
             .map { issue -> String in
-                if Env.current.git.createBranch(name: issue.branchName) {
-                    _ = Env.current.git.pushSetUpstream()
+                if Env.current.git.createBranch(name: issue.branchName), Env.current.git.pushSetUpstream() {
+                    return issue.key
                 } else if let currentBranch = Env.current.git.currentBranch,
                     Env.current.git.branches(.all, excludeCurrent: true).contains(currentBranch) {
                     Env.current.shell.write("There is already a branch for \(issue.branchName).")
@@ -44,7 +44,7 @@ public struct Initialize: Procedure {
                     }
                 } else if Env.current.shell.promptDecision("Want to enter another branch name?") {
                     if let branchName = Env.current.shell.prompt("Branch name:") {
-                        _ = Env.current.git.createBranch(name: branchName)
+                        _ = Env.current.git.createBranch(name: branchName) && Env.current.git.pushSetUpstream()
                     }
                 }
 
