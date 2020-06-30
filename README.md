@@ -250,7 +250,10 @@ Options:
   -n, --name <value>
       New name for current branch.
 
-flow reset-login, reset
+flow reset, rs
+Unstage one or more files.
+
+flow reset-login
 Reset username (saved in UserDefaults) and password (saved in Keychain).
 
 flow resolve-conflicts, resolve

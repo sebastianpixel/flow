@@ -51,8 +51,8 @@ class GitMock: Git {
         rootDirectoryCallback()
     }
 
-    var stagedFilesCallback = { String?.none }
-    var stagedFiles: String? {
+    var stagedFilesCallback = { [String]() }
+    var stagedFiles: [String] {
         stagedFilesCallback()
     }
 
@@ -129,6 +129,11 @@ class GitMock: Git {
     var renameCurrentBranchCallback: (String) -> Bool = { _ in false }
     func renameCurrentBranch(newName: String) -> Bool {
         renameCurrentBranchCallback(newName)
+    }
+
+    var resetCallback: (String) -> Bool = { _ in false }
+    func reset(_ file: String) -> Bool {
+        resetCallback(file)
     }
 
     var revertCallback: (GitCommit) -> Bool = { _ in false }

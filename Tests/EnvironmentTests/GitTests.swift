@@ -358,6 +358,12 @@ class GitTests: XCTestCase {
         _ = git.revert(.init(shortHash: "shortHash", subject: "subject", isMergeCommit: true))
         XCTAssertEqual(commands.last, "git revert -m 1 shortHash")
     }
+
+    func testReset() {
+        booleanReturn = [true]
+        _ = git.reset("/path/to/file")
+        XCTAssertEqual(commands.last, "git reset \("/path/to/file")")
+    }
 }
 
 extension GitService {
