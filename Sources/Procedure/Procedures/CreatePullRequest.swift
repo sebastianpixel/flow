@@ -56,8 +56,10 @@ public final class CreatePullRequest: Procedure {
             .await()
             .flatMap { [weak self] destinationBranch, reviewers -> Result<PostPullRequest.Response, Swift.Error> in
                 guard let self = self else { return .failure(Error.selfDeallocated) }
-                var title = Env.current.defaults.get(String.self, for: .lastPRTitle) ?? self.createDefaultTitle(from: currentBranch)
-                var description = Env.current.defaults.get(String.self, for: .lastPRDescription) ?? ""
+                let now = Date().timeIntervalSince1970
+                let isSavedDataStale = Env.current.defaults.get(TimeInterval.self, for: .lastPRDate) ?? 0 < now - 120
+                var title = (!isSavedDataStale ? Env.current.defaults.get(for: .lastPRTitle) : nil) ?? self.createDefaultTitle(from: currentBranch)
+                var description = (!isSavedDataStale ? Env.current.defaults.get(for: .lastPRDescription) : nil) ?? ""
                 if !self.noEdit {
                     switch self.promptToCreateTitleAndDescription(defaultTitle: title, defaultDescription: description) {
                     case let .success(success):
@@ -65,6 +67,7 @@ public final class CreatePullRequest: Procedure {
                         Env.current.defaults[.lastPRTitle] = title
                         description = success.description
                         Env.current.defaults[.lastPRDescription] = description
+                        Env.current.defaults[.lastPRDate] = now
                     case let .failure(failure):
                         return .failure(failure)
                     }
@@ -101,8 +104,7 @@ public final class CreatePullRequest: Procedure {
 
         switch result {
         case .success:
-            Env.current.defaults.removeObject(for: .lastPRTitle)
-            Env.current.defaults.removeObject(for: .lastPRDescription)
+            [DefaultsKey.lastPRTitle, .lastPRDescription, .lastPRDate].forEach(Env.current.defaults.removeObject)
             if browseAfterSuccessfulCreation,
                 let url = getUrlOfPullRequest(branch: currentBranch) {
                 return Env.current.workspace.open(url)
