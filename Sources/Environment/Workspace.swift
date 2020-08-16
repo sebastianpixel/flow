@@ -7,10 +7,18 @@ public protocol Workspace {
 
 struct WorkspaceImpl: Workspace {
     func open(_ url: URL) -> Bool {
-        NSWorkspace.shared.open(url)
+        let result = NSWorkspace.shared.open(url)
+        if Env.current.debug, !result {
+            Env.current.shell.write("Couldn't open URL\"\(url)\".")
+        }
+        return result
     }
 
     func openFile(_ fullPath: String) -> Bool {
-        NSWorkspace.shared.openFile(fullPath)
+        let result = NSWorkspace.shared.openFile(fullPath)
+        if Env.current.debug, !result {
+            Env.current.shell.write("Couldn't open path \"\(fullPath)\".")
+        }
+        return result
     }
 }

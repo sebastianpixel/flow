@@ -81,7 +81,8 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
         // at the cursor position should not be added when enter is pressed.
         if selectedModels.isEmpty,
             let selectedModel = selectedModel,
-            !selectedModels.contains(where: { $0 == selectedModel }) {
+            !selectedModels.contains(where: { $0 == selectedModel })
+        {
             selectedModels.append(selectedModel)
         }
 
@@ -126,13 +127,15 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
 
     /// Blocks execution until the user hits enter or ESC, CtrlC.
     private func waitForInput() -> String? {
-        let input = try? lineReader.readLine(prompt: "> ",
-                                             maxCount: 200,
-                                             printNewlineAfterSelection: false,
-                                             strippingNewline: true,
-                                             promptProperties: defaultPrompt.textProperties,
-                                             readProperties: .none,
-                                             parenProperties: .none)
+        let input = try? lineReader.readLine(
+            prompt: "> ",
+            maxCount: 200,
+            printNewlineAfterSelection: false,
+            strippingNewline: true,
+            promptProperties: defaultPrompt.textProperties,
+            readProperties: .none,
+            parenProperties: .none
+        )
         // only refresh if cursor is NOT in bottom row (see `setupLineReader`)
         if cursor.isInDefaultRow {
             lineDrawer.reset()
@@ -262,7 +265,8 @@ public final class LineSelector<DataSource: LineSelectorDataSource> {
             } else if substring.isEmpty {
                 line.text = text
             } else if let lineTextRange = lineTextRange(in: text),
-                let highlightedRange = text.range(of: substring, options: [.regularExpression, .caseInsensitive], range: lineTextRange) {
+                let highlightedRange = text.range(of: substring, options: [.regularExpression, .caseInsensitive], range: lineTextRange)
+            {
                 let prefix = String(text[text.startIndex ..< highlightedRange.lowerBound])
                 let highlighted = hightlightTextProperties.apply(to: String(text[highlightedRange]))
                 let suffix = String(text[highlightedRange.upperBound ..< text.endIndex])

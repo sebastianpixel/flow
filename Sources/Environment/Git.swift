@@ -117,7 +117,7 @@ class GitImpl: Git {
     }
 
     func listFiles(_ fileTypes: [GitFileType]) -> [String] {
-        let cmd = "git ls-files --exclude-standard --full-name \(fileTypes.map { $0.flag }.joined(separator: " "))".trimmingCharacters(in: .whitespaces)
+        let cmd = "git ls-files --exclude-standard --full-name \(fileTypes.map(\.flag).joined(separator: " "))".trimmingCharacters(in: .whitespaces)
         return Env.current.shell.run(cmd)?
             .components(separatedBy: .newlines)
             .filter { !$0.isEmpty } ?? []
@@ -296,7 +296,7 @@ class GitImpl: Git {
             let host = components.host?.components(separatedBy: .punctuationCharacters),
             let firstLevelDomain = host.last,
             let secondLevelDomain = host.dropLast().last
-            else { return nil }
+        else { return nil }
 
         let domain = [secondLevelDomain, firstLevelDomain].joined(separator: ".")
 

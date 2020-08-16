@@ -9,10 +9,12 @@ struct URLSessionMock: URLSessionProtocol {
         let urlSession = URLSession(configuration: configuration)
         URLProtocolMock.requestHandler = { urlRequest in
             guard let url = urlRequest.url else { throw URLProtocolMock.Error.requestUrl }
-            guard let response = HTTPURLResponse(url: url,
-                                                 statusCode: 200,
-                                                 httpVersion: nil,
-                                                 headerFields: nil) else { throw URLProtocolMock.Error.response }
+            guard let response = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            ) else { throw URLProtocolMock.Error.response }
             return (response, R.Response.fixture.encoded)
         }
         return urlSession.dataTask(with: request.urlRequest, completionHandler: completionHandler)

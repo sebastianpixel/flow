@@ -27,7 +27,8 @@ public struct CreateCommit: Procedure {
         let noMessageWasProvided = subject.isEmpty
 
         if prependWithIssueKey,
-            let key = Env.current.jira.currentIssueKey() {
+            let key = Env.current.jira.currentIssueKey()
+        {
             subject = "[\(key)] \(subject)"
         }
 
@@ -37,7 +38,8 @@ public struct CreateCommit: Procedure {
 
         if noMessageWasProvided,
             let lastCommitSubject = Env.current.defaults[.lastCommitSubject] as String?,
-            let lastCommitBody = Env.current.defaults[.lastCommitBody] as String? {
+            let lastCommitBody = Env.current.defaults[.lastCommitBody] as String?
+        {
             subject = lastCommitSubject
             body = lastCommitBody.isEmpty ? "" : "\(lastCommitBody)\n"
         }
@@ -48,7 +50,8 @@ public struct CreateCommit: Procedure {
                 path: .init(stringLiteral: "\(root)/.git/COMMIT_EDITMSG"),
                 write: { template(subject: subject, body: body) }
             ),
-            Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(commitFile.path)") {
+            Env.current.shell.runForegroundTask("\(Env.current.shell.editor) \(commitFile.path)")
+        {
             let content = commitFile.parse(markEndLinePrefix: "# On branch")
 
             subject = content.first { !$0.isEmpty } ?? ""

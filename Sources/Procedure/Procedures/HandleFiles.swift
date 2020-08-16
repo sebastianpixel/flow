@@ -28,7 +28,8 @@ public struct HandleFiles: Procedure {
         let paths = Env.current.git.listFiles(fileTypes)
 
         guard !paths.isEmpty,
-            let rootDirectory = Env.current.git.rootDirectory else {
+            let rootDirectory = Env.current.git.rootDirectory
+            else {
                 Env.current.shell.write("No relevant files found.")
                 return false
         }

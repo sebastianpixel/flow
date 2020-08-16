@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/nicklockwood/SwiftFormat",
         "state": {
           "branch": null,
-          "revision": "0f12bf541076a4d923f9b32387fe662f04c33ccc",
-          "version": "0.44.14"
+          "revision": "e5675ae49383e0d248d495bcfbedaa6f9b1f5375",
+          "version": "0.45.6"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/Realm/SwiftLint.git",
         "state": {
           "branch": null,
-          "revision": "b1c72069cafa6cdebfb9274806cd976c54d8dde5",
-          "version": "0.39.2"
+          "revision": "da66a81710714112d51041264440987b992849c3",
+          "version": "0.40.0"
         }
       },
       {

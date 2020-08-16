@@ -68,7 +68,8 @@ extension Request {
         let password = Env.current.login.password
         guard let loginString = "\(username):\(password)"
             .data(using: .utf8)?
-            .base64EncodedString() else {
+            .base64EncodedString()
+            else {
                 fatalError("Could not generate base64EncodedString from login.")
         }
 

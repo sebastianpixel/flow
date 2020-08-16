@@ -34,7 +34,8 @@ public struct BrowseGit: Procedure {
         }() ?? Env.current.jira.currentIssueKey().flatMap({ Env.current.git.branch(containing: $0, excludeCurrent: false) }) else { return false }
 
         if pullRequest,
-            let url = getUrlOfPullRequest(branch: branch) {
+            let url = getUrlOfPullRequest(branch: branch)
+        {
             return Env.current.workspace.open(url)
         }
 
@@ -45,7 +46,8 @@ public struct BrowseGit: Procedure {
 
         var directory: String?
         if currentDirectory,
-            let rootDirectory = Env.current.git.rootDirectory {
+            let rootDirectory = Env.current.git.rootDirectory
+        {
             directory = FileManager.default.currentDirectoryPath
             directory?
                 .range(of: rootDirectory)

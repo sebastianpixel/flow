@@ -39,10 +39,12 @@ extension File {
 
         for line in content.components(separatedBy: .newlines).map({ $0.trimmingCharacters(in: .whitespaces) }) {
             if let endMarker = markEndLinePrefix,
-                line.hasPrefix(endMarker) {
+                line.hasPrefix(endMarker)
+            {
                 break
             } else if let markSwitchToSecondBlockLinePrefix = markSwitchToSecondBlockLinePrefix,
-                line.hasPrefix(markSwitchToSecondBlockLinePrefix) {
+                line.hasPrefix(markSwitchToSecondBlockLinePrefix)
+            {
                 switchToSecond = true
             } else if line.hasPrefix("#") {
                 continue

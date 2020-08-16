@@ -58,7 +58,8 @@ final class LoginImpl: Login {
                 return username
             } else {
                 guard let username = Env.current.shell.prompt("Enter your JIRA username"),
-                    !username.isEmpty else {
+                    !username.isEmpty
+                    else {
                         return try renew(prompt: false).get().username
                 }
                 Env.current.defaults[.username] = username
@@ -84,9 +85,9 @@ final class LoginImpl: Login {
         if let newPassword = Env.current.shell.prompt("Enter your JIRA password", newline: false, silent: true), !newPassword.isEmpty {
             return Env.current.keychain.create(password: newPassword, account: username)
                 .map { _ in newPassword }
-                .flatMapError { _ in renew(prompt: true).map { $0.password } }
+                .flatMapError { _ in renew(prompt: true).map(\.password) }
         }
 
-        return renew(prompt: true).map { $0.password }
+        return renew(prompt: true).map(\.password)
     }
 }

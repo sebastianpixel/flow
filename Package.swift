@@ -71,15 +71,19 @@ import PackageConfig
 // so changes can be reviewed.
 // https://github.com/nicholascross/Injectable/blob/master/Package.swift
 private let autoCorrect = #"""
-git --no-pager diff --staged --name-only | xargs git diff | md5 > .pre_format_hash
+git --no-pager diff --staged --name-only --diff-filter=ACM | xargs git diff | md5 > .pre_format_hash
 swift run swiftformat . \
-    --disable strongifiedSelf \
-    --disable trailingClosures \
+    --disable strongifiedSelf,trailingClosures,blankLinesAtStartOfScope \
     --commas inline \
     --xcodeindentation enabled \
     --ifdef no-indent \
-    --swiftversion 5.3
-git --no-pager diff --staged --name-only | xargs git diff | md5 > .post_format_hash
+    --swiftversion 5.3 \
+    --header strip \
+    --wraparguments before-first \
+    --wrapcollections before-first \
+    --stripunusedargs closure-only
+
+git --no-pager diff --staged --name-only --diff-filter=ACM | xargs git diff | md5 > .post_format_hash
 diff .pre_format_hash .post_format_hash > /dev/null || {
     echo "Staged files modified during commit"
     rm .pre_format_hash .post_format_hash

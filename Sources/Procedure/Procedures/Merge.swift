@@ -24,12 +24,14 @@ public struct Merge: Procedure {
         if let branch = branch, !branch.isEmpty {
             branchToMerge = branch
         } else if let pattern = expression,
-            let branch = Env.current.git.branch(containing: pattern, excludeCurrent: true, options: .regularExpression) {
+            let branch = Env.current.git.branch(containing: pattern, excludeCurrent: true, options: .regularExpression)
+        {
             branchToMerge = branch
         } else if parent,
             let currentIssueKey = Env.current.jira.currentIssueKey(),
             let parentIssueKey = GetIssue(issueKey: currentIssueKey).awaitResponseWithDebugPrinting()?.fields.parent?.key,
-            let parentIssueBranch = Env.current.git.branch(containing: parentIssueKey, excludeCurrent: true) {
+            let parentIssueBranch = Env.current.git.branch(containing: parentIssueKey, excludeCurrent: true)
+        {
             branchToMerge = parentIssueBranch
         } else {
             let branches = Env.current.git.branches(all ? .all : .local)

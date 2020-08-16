@@ -270,6 +270,11 @@ Options:
   -i, --issue <value>
       Specify the issue key for which to set the transition.
 
-flow xcopen, open, o
-Open XCode workspace, project or playground in current working directory.
+flow xcopen, open, o <options>
+Open Xcode workspace, project or playground in current working directory.
+Options:
+  -h, --help
+      Print the usage description of 'xcopen'.
+  -p, --path <value>
+      Path to directory of Xcode workspace, project or playground or directly to workspace, project or playground.
 ```

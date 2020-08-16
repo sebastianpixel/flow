@@ -30,16 +30,19 @@ public final class Command {
         let optionsName = "Options:"
         let synopsisOptions = "<options>"
         let synopsisDesciption = description.isEmpty ? "" : "\n\(ansi ? description.styled(.italic) : description)"
-        var usageDescription = flags.usageDescription(usageName: toolName,
-                                                      synopsis: "\(synopsisOptions)\(synopsisDesciption)",
-                                                      usageStyle: .none,
-                                                      optionsName: optionsName,
-                                                      flagStyle: ansi ? TextStyle.italic.properties : .none,
-                                                      indent: "  ")
+        var usageDescription = flags.usageDescription(
+            usageName: toolName,
+            synopsis: "\(synopsisOptions)\(synopsisDesciption)",
+            usageStyle: .none,
+            optionsName: optionsName,
+            flagStyle: ansi ? TextStyle.italic.properties : .none,
+            indent: "  "
+        )
 
         if let optionsNameRange = usageDescription.range(of: "\(optionsName)\n"),
             optionsNameRange.upperBound.utf16Offset(in: usageDescription) == usageDescription.count,
-            let synopsisRange = usageDescription.range(of: synopsisOptions) {
+            let synopsisRange = usageDescription.range(of: synopsisOptions)
+        {
             usageDescription.removeSubrange(optionsNameRange)
             usageDescription.removeSubrange(synopsisRange)
         }

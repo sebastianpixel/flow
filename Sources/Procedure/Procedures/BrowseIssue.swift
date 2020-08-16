@@ -18,7 +18,8 @@ public struct BrowseIssue: Procedure {
         let keyOfIssueToOpen: String?
 
         if let expression = expression,
-            let project = Env.current.jira.currentProject {
+            let project = Env.current.jira.currentProject
+        {
             let issueTypes: [Issue.IssueType.Name] = [.bug, .bugSub, .story, .subTask, .techStory]
             let issues = GetIssues(jiraProject: project, types: issueTypes, limit: 300).request().await()
             switch issues {

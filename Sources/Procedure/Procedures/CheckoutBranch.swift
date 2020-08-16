@@ -15,14 +15,16 @@ public struct CheckoutBranch: Procedure {
 
     public func run() -> Bool {
         if let pattern = pattern,
-            let branch = Env.current.git.branch(containing: pattern, excludeCurrent: true, options: [.regularExpression]) {
+            let branch = Env.current.git.branch(containing: pattern, excludeCurrent: true, options: [.regularExpression])
+        {
             return Env.current.git.checkout(branch)
         }
 
         if parent,
             let currentIssueKey = Env.current.jira.currentIssueKey(),
             let parentIssueKey = GetIssue(issueKey: currentIssueKey).awaitResponseWithDebugPrinting()?.fields.parent?.key,
-            let parentIssueBranch = Env.current.git.branches(.all).first(where: { $0.contains(parentIssueKey) }) {
+            let parentIssueBranch = Env.current.git.branches(.all).first(where: { $0.contains(parentIssueKey) })
+        {
             return Env.current.git.checkout(parentIssueBranch)
         }
 
@@ -35,7 +37,7 @@ public struct CheckoutBranch: Procedure {
         let dataSource = GenericLineSelectorDataSource(items: branches)
         return LineSelector(dataSource: dataSource)?
             .singleSelection()
-            .flatMap { $0.output }
+            .flatMap(\.output)
             .map(Env.current.git.checkout) ?? true
     }
 }

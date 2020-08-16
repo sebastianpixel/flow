@@ -83,7 +83,8 @@ public struct Initialize: Procedure {
                 !issues.issues.contains(issue),
                 Env.current.shell.promptDecision(
                     "The issue is currenlty not part of the active sprint \"\(currentSprint.name)\". Do you want to move it (will \(issue.fields.storyPoints ?? 0 == 0 ? "not " : "")affect the sprint's total estimation)?"
-                ) {
+                )
+            {
                 return PostMoveIssuesToSprint(sprint: currentSprint, issues: [issue]).awaitResponseWithDebugPrinting() != nil
             }
             return true

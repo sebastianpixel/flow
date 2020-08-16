@@ -20,7 +20,7 @@ public struct GetIssuesBySprint: Request {
     public let path = "/rest/api/2/search"
     public let httpBody = Data?.none
     public var queryItems: [URLQueryItem] {
-        let issueTypes = types.map { $0.jqlSearchTerm }.joined(separator: ",")
+        let issueTypes = types.map(\.jqlSearchTerm).joined(separator: ",")
         return [
             .init(name: "jql", value: #"Sprint=\#(sprint.id)+AND+issuetype+in+(\#(issueTypes))"#),
             .init(name: "fields", value: "key,summary,issuetype,parent,updated,description,fixVersions,customfield_10522,customfield_10223"),

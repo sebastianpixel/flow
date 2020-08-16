@@ -11,9 +11,9 @@ public struct MergePullRequest: Procedure {
             let pullRequests = GetPullRequests(
                 stashProject: project,
                 repository: repository
-            )
+        )
         .awaitResponseWithDebugPrinting()?
-        .values else { return false }
+            .values else { return false }
 
         guard !pullRequests.isEmpty else {
             Env.current.shell.write("No open pull requests!")
@@ -36,13 +36,15 @@ public struct MergePullRequest: Procedure {
         }
 
         if Env.current.shell.promptDecision("Remove the local branch?"),
-            Env.current.git.checkout(pullRequest.toRef.displayId) {
+            Env.current.git.checkout(pullRequest.toRef.displayId)
+        {
             guard Env.current.git.deleteLocal(branch: pullRequest.fromRef.displayId, forced: true),
                 Env.current.git.pull() else { return false }
         }
 
         if let issueKey = pullRequest.fromRef.displayId.extracting(.jiraIssueKeyPattern),
-            Env.current.shell.promptDecision("Update \(issueKey)?") {
+            Env.current.shell.promptDecision("Update \(issueKey)?")
+        {
             return SetTransition(issueKey: issueKey).run()
         }
 

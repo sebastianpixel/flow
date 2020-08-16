@@ -18,7 +18,7 @@ public struct PostMoveIssuesToSprint: Request {
     public var path: String { "/rest/agile/1.0/sprint/\(sprint.id)/issue" }
     public var httpBody: Data? {
         do {
-            return try ["issues": issues.map { $0.key }].encoded()
+            return try ["issues": issues.map(\.key)].encoded()
         } catch {
             fatalError(error.localizedDescription)
         }

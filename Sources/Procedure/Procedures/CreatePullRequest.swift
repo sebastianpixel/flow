@@ -26,11 +26,13 @@ public final class CreatePullRequest: Procedure {
     private var currentIssueKey = Env.current.jira.currentIssueKey(promptOnError: false)
     private lazy var currentIssue = { currentIssueKey.map(GetIssue.init)?.awaitResponseWithDebugPrinting() }()
 
-    public init(defaultReviewers: Bool,
-                parentBranch: Bool,
-                noEdit: Bool,
-                browseAfterSuccessfulCreation: Bool,
-                copyPRDescriptionToClipboard: Bool) {
+    public init(
+        defaultReviewers: Bool,
+        parentBranch: Bool,
+        noEdit: Bool,
+        browseAfterSuccessfulCreation: Bool,
+        copyPRDescriptionToClipboard: Bool
+    ) {
         self.defaultReviewers = defaultReviewers
         self.parentBranch = parentBranch
         self.noEdit = noEdit
@@ -72,17 +74,20 @@ public final class CreatePullRequest: Procedure {
                         return .failure(failure)
                     }
                 }
-                let result = PostPullRequest(stashProject: stashProject,
-                                             repository: repo,
-                                             title: title,
-                                             source: currentBranch,
-                                             destination: destinationBranch,
-                                             reviewers: reviewers,
-                                             description: description,
-                                             closeSourceBranch: true).request().await()
+                let result = PostPullRequest(
+                    stashProject: stashProject,
+                    repository: repo,
+                    title: title,
+                    source: currentBranch,
+                    destination: destinationBranch,
+                    reviewers: reviewers,
+                    description: description,
+                    closeSourceBranch: true
+                ).request().await()
                 if copyPRDescriptionToClipboard,
                     result.isSuccess,
-                    let url = getUrlOfPullRequest(branch: currentBranch)?.absoluteString {
+                    let url = getUrlOfPullRequest(branch: currentBranch)?.absoluteString
+                {
                     Env.current.clipboard.string = "PR \"\(title)\": \(url)"
                 }
                 return result
@@ -106,7 +111,8 @@ public final class CreatePullRequest: Procedure {
         case .success:
             [DefaultsKey.lastPRTitle, .lastPRDescription, .lastPRDate].forEach(Env.current.defaults.removeObject)
             if browseAfterSuccessfulCreation,
-                let url = getUrlOfPullRequest(branch: currentBranch) {
+                let url = getUrlOfPullRequest(branch: currentBranch)
+            {
                 return Env.current.workspace.open(url)
             } else {
                 return true
@@ -136,7 +142,7 @@ public final class CreatePullRequest: Procedure {
                 .map { result -> Result<[String], Swift.Error> in
                     result.flatMap {
                         let username = Env.current.login.username
-                        let names = $0.first?.reviewers.filter { $0.active == true && $0.name != username }.map { $0.name }
+                        let names = $0.first?.reviewers.filter { $0.active == true && $0.name != username }.map(\.name)
                         if let reviewers = names {
                             return .success(reviewers)
                         } else {
@@ -164,8 +170,9 @@ public final class CreatePullRequest: Procedure {
                                         line: \.description
                                     )
                                 ),
-                                let selection = lineSelector.multiSelection() {
-                                return .success(selection.output.map { $0.name })
+                                let selection = lineSelector.multiSelection()
+                            {
+                                return .success(selection.output.map(\.name))
                             } else {
                                 return .failure(Error.noReviewersReceived)
                             }
@@ -182,7 +189,8 @@ public final class CreatePullRequest: Procedure {
         if parentBranch {
             if let currentIssue = currentIssue,
                 let parentKey = currentIssue.fields.parent?.key,
-                let parentBranch = allBranches.first(where: { $0.contains(parentKey) }) {
+                let parentBranch = allBranches.first(where: { $0.contains(parentKey) })
+            {
                 destinationBranch = .success(parentBranch)
             } else {
                 Env.current.shell.write("Could not find parent branch. Please choose one from the following:")

@@ -11,9 +11,11 @@ public final class Tool {
     private var commands = [String: Command]()
 
     @discardableResult
-    public init(name: String = URL(fileURLWithPath: CommandLine.arguments.first!).lastPathComponent,
-                arguments: [String] = Array(CommandLine.arguments.dropFirst()),
-                decorator: (Tool) -> Void) {
+    public init(
+        name: String = URL(fileURLWithPath: CommandLine.arguments.first!).lastPathComponent,
+        arguments: [String] = Array(CommandLine.arguments.dropFirst()),
+        decorator: (Tool) -> Void
+    ) {
         toolName = name
         self.arguments = arguments
         decorator(self)
@@ -70,10 +72,13 @@ public final class Tool {
         }
         // Add default help flag if there are options and there is no custom help flag.
         if !cmd.registeredFlags.isEmpty,
-            !cmd.registeredFlags.contains(where: { $0.shortName == "h" || $0.longName == "help" }) {
-            let option = Option(shortName: "h",
-                                longName: "help",
-                                description: "Print the usage description of '\(cmd.name)'.") {
+            !cmd.registeredFlags.contains(where: { $0.shortName == "h" || $0.longName == "help" })
+        {
+            let option = Option(
+                shortName: "h",
+                longName: "help",
+                description: "Print the usage description of '\(cmd.name)'."
+            ) {
                 Env.current.shell.write(cmd.usageDescription(ansi: true))
                 cmd.handler {} // set empty handler to block default behaviour
             }
@@ -92,7 +97,8 @@ public final class Tool {
             let (index, argument) = current
             if activeQuotes == nil,
                 let first = argument.first,
-                first == "\"" || first == "\'" {
+                first == "\"" || first == "\'"
+            {
                 activeQuotes = first
                 arguments.append(String(argument.dropFirst()))
             } else if let quotes = activeQuotes {

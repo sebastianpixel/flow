@@ -58,7 +58,8 @@ extension Procedure {
             let pullRequests = GetPullRequests(stashProject: stashProject, repository: repository).awaitResponseWithDebugPrinting(),
             let pullRequestOfCurrentBranch = pullRequests.values.first(where: { $0.fromRef.displayId == branch }),
             let href = pullRequestOfCurrentBranch.links.linksSelf.first?.href,
-            let url = URL(string: href) {
+            let url = URL(string: href)
+        {
             return url
         }
         return nil

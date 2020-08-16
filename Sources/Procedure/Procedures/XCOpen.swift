@@ -2,12 +2,29 @@ import Environment
 import Foundation
 
 public struct XCOpen: Procedure {
-    public init() {}
+    private let path: String
+
+    public init(path: String?) {
+        let currentDirectory = FileManager.default.currentDirectoryPath
+        if let path = path, path.starts(with: ".") {
+            self.path = currentDirectory + path.dropFirst()
+        } else {
+            self.path = path ?? currentDirectory
+        }
+    }
 
     public func run() -> Bool {
+        if Env.current.debug {
+            Env.current.shell.write("\(path)")
+        }
+
+        if path.range(of: "\\.(xcodeproj|xcworkspace|playground)$", options: .regularExpression) != nil {
+            return Env.current.workspace.openFile(path)
+        }
+
         let files: [String]
         do {
-            files = try FileManager.default.contentsOfDirectory(atPath: FileManager.default.currentDirectoryPath)
+            files = try FileManager.default.contentsOfDirectory(atPath: path)
         } catch {
             Env.current.shell.write("\(error)")
             return false

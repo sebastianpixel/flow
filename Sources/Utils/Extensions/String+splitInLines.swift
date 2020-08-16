@@ -26,11 +26,13 @@ public extension String {
                 // to lines, make subrange from whitespace the new saved
                 // characters and continue from there.
                 if let nextScalar = self[nextIndex].unicodeScalars.first,
-                    !CharacterSet.whitespaces.contains(nextScalar) {
+                    !CharacterSet.whitespaces.contains(nextScalar)
+                {
                     var previousCharacterIndex = characters.endIndex - 1
                     while previousCharacterIndex > characters.startIndex,
                         let scalar = characters[previousCharacterIndex].unicodeScalars.first,
-                        !CharacterSet.whitespaces.contains(scalar) {
+                        !CharacterSet.whitespaces.contains(scalar)
+                    {
                         previousCharacterIndex -= 1
                     }
                     lines.append(String(characters[..<previousCharacterIndex]))

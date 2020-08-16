@@ -62,7 +62,8 @@ public struct ApiClient {
                     }
 
                     if data.isEmpty,
-                        let empty = Empty() as? R.Response {
+                        let empty = Empty() as? R.Response
+                    {
                         return empty
                     }
 

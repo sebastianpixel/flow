@@ -126,22 +126,28 @@ public struct Reminders: Procedure {
         switch action {
         case .add:
             let titles = promptTitlesToAdd()
-            return add(titles: titles,
-                       store: store,
-                       calendar: calendar,
-                       lineDrawer: lineDrawer)
+            return add(
+                titles: titles,
+                store: store,
+                calendar: calendar,
+                lineDrawer: lineDrawer
+            )
         case .defaultCalendar:
             return changeCalendar(store: store) != nil
 
         case .complete, .remove:
-            return completeOrRemove(action: action,
-                                    store: store,
-                                    remindersDataSource: remindersDataSource,
-                                    lineDrawer: lineDrawer)
+            return completeOrRemove(
+                action: action,
+                store: store,
+                remindersDataSource: remindersDataSource,
+                lineDrawer: lineDrawer
+            )
         case .edit:
-            return edit(store: store,
-                        remindersDataSource: remindersDataSource,
-                        lineDrawer: lineDrawer)
+            return edit(
+                store: store,
+                remindersDataSource: remindersDataSource,
+                lineDrawer: lineDrawer
+            )
         case .quit:
             return true
         }
@@ -206,8 +212,10 @@ public struct Reminders: Procedure {
     private func add(titles: [String], store: EKEventStore, calendar: EKCalendar, lineDrawer: LineDrawer) -> Bool {
         guard !titles.isEmpty else { return false }
 
-        let info = Reminders.Info(repository: Env.current.git.currentRepo,
-                                  branch: Env.current.git.currentBranch)
+        let info = Reminders.Info(
+            repository: Env.current.git.currentRepo,
+            branch: Env.current.git.currentBranch
+        )
 
         for title in titles {
             let reminder = EKReminder(eventStore: store)
@@ -238,11 +246,13 @@ public struct Reminders: Procedure {
         if let info = reminder.info {
             var line = [String]()
             if let repository = info.repository,
-                repository != repoCache {
+                repository != repoCache
+            {
                 line.append("repo: \(repository)")
             }
             if let branch = info.branch,
-                branch != branchCache {
+                branch != branchCache
+            {
                 line.append("branch: \(branch)")
             }
             return "\(reminder.title ?? "")\(line.isEmpty ? "" : " (\(line.joined(separator: ", ")))")"
