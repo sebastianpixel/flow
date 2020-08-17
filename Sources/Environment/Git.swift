@@ -27,6 +27,7 @@ public protocol Git {
     func fetch() -> Bool
     func listFiles(_ fileTypes: [GitFileType]) -> [String]
     func merge(_ branch: String) -> Bool
+    func rebase(_ branch: String) -> Bool
     func pull() -> Bool
     func push() -> Bool
     func pushSetUpstream() -> Bool
@@ -244,6 +245,10 @@ class GitImpl: Git {
 
     func merge(_ branch: String) -> Bool {
         Env.current.shell.runForegroundTask("git merge \(branch)")
+    }
+
+    func rebase(_ branch: String) -> Bool {
+        Env.current.shell.runForegroundTask("git rebase \(branch)")
     }
 
     func pushSetUpstream() -> Bool {

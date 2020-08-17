@@ -217,6 +217,22 @@ Options:
       If current branch belongs to a sub-task this will look for the
       parent issue's branch and set it as destination of the pull request.
 
+flow rebase, r <options>
+Rebase another branch into the current one.
+Options:
+  -a, --all
+      Select branch to rebase into current one from all branches in the repository.
+  -b, --branch <value>
+      Specify a branch to rebase into the current one.
+      If not set a selector will be shown to pick from local
+      (default) or all branches in the repository.
+  -e, --expression <value>
+      Search for a branch to rebase containing the specified regex pattern.
+  -h, --help
+      Print the usage description of 'rebase'.
+  -p, --parent
+      Rebase branch of parent issue into the current branch.
+
 flow reminders, todos, todo, td <options>
 Show and edit todos from iCloud reminders.
 Options:

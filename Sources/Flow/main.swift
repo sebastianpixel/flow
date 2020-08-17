@@ -339,45 +339,51 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("merge", "m", description: "Merge another branch into the current one.") { cmd in
+    for (command, mode) in [("Merge", MergeOrRebase.Mode.merge), ("Rebase", .rebase)] {
+        let longFlag = command.lowercased()
+        let shortFlag = String(longFlag.first!)
+        let description = "\(command) another branch into the current one."
+        flow.registerCommand(longFlag, shortFlag, description: description) { cmd in
 
-        let branch = cmd.argument(
-            String.self,
-            shortName: "b",
-            longName: "branch",
-            description: """
-            Specify a branch to merge into the current one.
-                  If not set a selector will be shown to pick from local
-                  (default) or all branches in the repository.
-            """
-        )
+            let branch = cmd.argument(
+                String.self,
+                shortName: "b",
+                longName: "branch",
+                description: """
+                Specify a branch to \(longFlag) into the current one.
+                      If not set a selector will be shown to pick from local
+                      (default) or all branches in the repository.
+                """
+            )
 
-        let all = cmd.option(
-            shortName: "a",
-            longName: "all",
-            description: "Select branch to merge into current one from all branches in the repository."
-        )
+            let all = cmd.option(
+                shortName: "a",
+                longName: "all",
+                description: "Select branch to \(longFlag) into current one from all branches in the repository."
+            )
 
-        let parent = cmd.option(
-            shortName: "p",
-            longName: "parent",
-            description: "Merge branch of parent issue into the current branch."
-        )
+            let parent = cmd.option(
+                shortName: "p",
+                longName: "parent",
+                description: "\(command) branch of parent issue into the current branch."
+            )
 
-        let expression = cmd.argument(
-            String.self,
-            shortName: "e",
-            longName: "expression",
-            description: "Search for a branch to merge containing the specified regex pattern."
-        )
+            let expression = cmd.argument(
+                String.self,
+                shortName: "e",
+                longName: "expression",
+                description: "Search for a branch to \(longFlag) containing the specified regex pattern."
+            )
 
-        cmd.handler {
-            run(Merge(
-                branch: branch.value,
-                all: all.wasSet,
-                parent: parent.wasSet,
-                expression: expression.value
-            ))
+            cmd.handler {
+                run(MergeOrRebase(
+                    branch: branch.value,
+                    all: all.wasSet,
+                    parent: parent.wasSet,
+                    expression: expression.value,
+                    mode: mode
+                ))
+            }
         }
     }
 

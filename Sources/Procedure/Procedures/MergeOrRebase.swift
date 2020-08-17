@@ -2,17 +2,24 @@ import Environment
 import Request
 import UI
 
-public struct Merge: Procedure {
+public struct MergeOrRebase: Procedure {
+
+    public enum Mode {
+        case merge, rebase
+    }
+
     private let branch: String?
     private let expression: String?
     private let all: Bool
     private let parent: Bool
+    private let mode: Mode
 
-    public init(branch: String?, all: Bool, parent: Bool, expression: String?) {
+    public init(branch: String?, all: Bool, parent: Bool, expression: String?, mode: Mode) {
         self.branch = branch
         self.all = all
         self.parent = parent
         self.expression = expression
+        self.mode = mode
     }
 
     public func run() -> Bool {
@@ -46,6 +53,6 @@ public struct Merge: Procedure {
         return Env.current.git.checkout(branchToMerge)
             && Env.current.git.pull()
             && Env.current.git.checkout(currentBranch)
-            && Env.current.git.merge(branchToMerge)
+            && (mode == .merge ? Env.current.git.merge : Env.current.git.rebase)(branchToMerge)
     }
 }

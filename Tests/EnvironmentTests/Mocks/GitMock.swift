@@ -111,6 +111,11 @@ class GitMock: Git {
         mergeCallback(branch)
     }
 
+    var rebaseCallback: (String) -> Bool = { _ in false }
+    func rebase(_ branch: String) -> Bool {
+        rebaseCallback(branch)
+    }
+
     var pullCallback = { false }
     func pull() -> Bool {
         pullCallback()
