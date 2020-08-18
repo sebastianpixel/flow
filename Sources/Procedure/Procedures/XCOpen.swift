@@ -34,7 +34,8 @@ public struct XCOpen: Procedure {
 
         for ending in relevantFileEndings {
             if let file = files.first(where: { $0.hasSuffix(ending) }) {
-                return Env.current.workspace.openFile(file)
+                let url = Path(stringLiteral: path).appending(file).url
+                return Env.current.workspace.open(url)
             }
         }
 
