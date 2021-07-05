@@ -414,9 +414,21 @@ Tool { flow in
         }
     }
 
-    flow.registerCommand("remove", "rm", description: "Remove untracked and unstaged files.") {
-        $0.handler {
-            run(HandleFiles(.remove, untracked: true, unstaged: true))
+    flow.registerCommand("remove", "rm", description: "Remove untracked and unstaged files.") { cmd in
+        let all = cmd.option(
+            shortName: "a",
+            longName: "all",
+            description: "Remove all untracked and unstaged files without filtering."
+        )
+
+        cmd.handler {
+            run(
+                HandleFiles(
+                    .remove(quantifier: all.wasSet ? .all : .single),
+                    untracked: true,
+                    unstaged: true
+                )
+            )
         }
     }
 

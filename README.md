@@ -245,8 +245,13 @@ Options:
   -h, --help
       Print the usage description of 'reminders'.
 
-flow remove, rm
+flow remove, rm <options>
 Remove untracked and unstaged files.
+Options:
+  -a, --all
+      Remove all untracked and unstaged files without filtering.
+  -h, --help
+      Print the usage description of 'remove'.
 
 flow remove-branch, rmb <options>
 Remove local (default) or remote branches.
