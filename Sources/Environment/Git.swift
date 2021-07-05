@@ -121,12 +121,13 @@ class GitImpl: Git {
         let cmd = "git ls-files --exclude-standard --full-name \(fileTypes.map(\.flag).joined(separator: " "))".trimmingCharacters(in: .whitespaces)
         return Env.current.shell.run(cmd)?
             .components(separatedBy: .newlines)
+            .map(escapingWhitespaces)
             .filter { !$0.isEmpty } ?? []
     }
 
     func add(_ files: [String]) -> Bool {
         let joined = files
-            .map { $0.replacingOccurrences(of: "\\s", with: "\\\\ ", options: .regularExpression) }
+            .map(escapingWhitespaces)
             .joined(separator: " ")
         return Env.current.shell.runForegroundTask("git add \(joined)")
     }
@@ -155,6 +156,7 @@ class GitImpl: Git {
     var conflictedFiles: [String] {
         Env.current.shell.run("git diff --name-only --diff-filter=U")?
             .components(separatedBy: .newlines)
+            .map(escapingWhitespaces)
             .filter { !$0.isEmpty } ?? []
     }
 
@@ -312,5 +314,9 @@ class GitImpl: Git {
         remoteCache = (domain, path)
 
         return (domain, path)
+    }
+
+    private func escapingWhitespaces(_ string: String) -> String {
+        string.replacingOccurrences(of: "\\s", with: "\\\\ ", options: .regularExpression)
     }
 }
