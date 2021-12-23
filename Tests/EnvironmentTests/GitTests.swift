@@ -256,9 +256,15 @@ class GitTests: XCTestCase {
         XCTAssertEqual(commands.last, "git push")
     }
 
-    func testFetch() {
+    func testFetchWithPrune() {
         booleanReturn = [true]
-        _ = git.fetch()
+        _ = git.fetch(prune: true)
+        XCTAssertEqual(commands.last, "git fetch --prune")
+    }
+
+    func testFetchWithoutPrune() {
+        booleanReturn = [true]
+        _ = git.fetch(prune: false)
         XCTAssertEqual(commands.last, "git fetch")
     }
 

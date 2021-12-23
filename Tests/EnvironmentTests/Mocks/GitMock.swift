@@ -96,9 +96,9 @@ class GitMock: Git {
         deleteRemoteCallback(branch)
     }
 
-    var fetchCallback = { false }
-    func fetch() -> Bool {
-        fetchCallback()
+    var fetchCallback: (Bool) -> Bool = { _ in false }
+    func fetch(prune: Bool) -> Bool {
+        fetchCallback(prune)
     }
 
     var listFilesCallback: ([GitFileType]) -> [String] = { _ in [] }

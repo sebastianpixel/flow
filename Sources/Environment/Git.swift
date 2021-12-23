@@ -24,7 +24,7 @@ public protocol Git {
     func deleteLocal(branch: String, forced: Bool) -> Bool
     func deleteRemote(branch: String) -> Bool
     func difference(of branchA: String, to branchB: String) -> (additionsInA: [GitCommit], additionsInB: [GitCommit])
-    func fetch() -> Bool
+    func fetch(prune: Bool) -> Bool
     func listFiles(_ fileTypes: [GitFileType]) -> [String]
     func merge(_ branch: String) -> Bool
     func rebase(_ branch: String) -> Bool
@@ -134,7 +134,7 @@ class GitImpl: Git {
 
     func branches(_ branchType: GitBranchType, excludeCurrent: Bool) -> [String] {
         if branchType == .all {
-            _ = fetch()
+            _ = fetch(prune: true)
         }
         let cmd = "git branch --sort=-committerdate \(branchType.flag)"
         let currentBranch = self.currentBranch
@@ -146,11 +146,7 @@ class GitImpl: Git {
             .filter { !$0.contains("HEAD") && (excludeCurrent ? ($0 != currentBranch) : true) }
 
         var set = Set<String>()
-        return branches.reduce(into: [String]()) { branches, branch in
-            if set.insert(branch).inserted {
-                branches.append(branch)
-            }
-        }
+        return branches.filter { set.insert($0).inserted }
     }
 
     var conflictedFiles: [String] {
@@ -237,8 +233,8 @@ class GitImpl: Git {
         Env.current.shell.runForegroundTask("git push")
     }
 
-    func fetch() -> Bool {
-        Env.current.shell.runForegroundTask("git fetch")
+    func fetch(prune: Bool) -> Bool {
+        Env.current.shell.runForegroundTask("git fetch" + (prune ? " --prune" : ""))
     }
 
     func pull() -> Bool {
