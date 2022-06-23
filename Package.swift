@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         .package(name: "CommandLineKit", url: "https://github.com/sebastianpixel/swift-commandlinekit", .branch("master")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.44.14"),
-        .package(url: "https://github.com/orta/Komondor", from: "1.0.4"),
+        // .package(url: "https://github.com/orta/Komondor", from: "1.0.4"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0")
     ],
     targets: [
