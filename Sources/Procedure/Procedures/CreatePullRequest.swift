@@ -125,8 +125,8 @@ public final class CreatePullRequest: Procedure {
             case let ApiClientError.status(_, bitbucketError?):
                 Env.current.shell.write(bitbucketError.message)
                 return false
-            case Error.noBranchSelected, Error.noIssueKey, Error.noTitleProvided:
-                // User opt-out
+            case Error.noBranchSelected, Error.noIssueKey, Error.noTitleProvided, Error.transitionNotFound:
+                // User opt-out or different config
                 return true
             default:
                 return false
